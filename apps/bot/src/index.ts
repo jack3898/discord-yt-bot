@@ -1,17 +1,6 @@
+import { DISCORD_TOKEN } from '@yt-bot/env';
 import 'reflect-metadata';
-import { container, singleton } from 'tsyringe';
+import { container } from 'tsyringe';
+import { Bot } from './services/Bot';
 
-@singleton()
-export class Main {
-	works: boolean;
-
-	constructor() {
-		this.works = true;
-	}
-
-	test() {
-		console.log(`This works! and this.works in the singleton = ${this.works}`);
-	}
-}
-
-container.resolve(Main).test();
+container.resolve(Bot).login(DISCORD_TOKEN);

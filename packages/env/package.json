@@ -1,15 +1,10 @@
 {
-	"name": "@yt-bot/bot",
+	"name": "@yt-bot/env",
 	"private": true,
 	"version": "1.0.0",
-	"description": "The bot.",
-	"scripts": {
-		"dev": "ts-node src/index.ts",
-		"build": "ts-node app.build.ts",
-		"start": "node dist/app.js",
-		"lint": "eslint **/*.ts",
-		"test": "jest"
-	},
+	"description": "Type-safe environment variable access.",
+	"main": "index.ts",
+	"scripts": {},
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
@@ -24,21 +19,14 @@
 		"node": "18.x"
 	},
 	"dependencies": {
-		"@yt-bot/env": "*",
-		"discord.js": "^14.6.0",
-		"reflect-metadata": "^0.1.13",
-		"tsyringe": "^4.7.0"
+		"@yt-bot/constants": "*",
+		"dotenv": "^16.0.3"
 	},
-	"peerDependencies": {},
 	"devDependencies": {
-		"@types/jest": "^29.2.3",
-		"@types/node": "^18.11.9",
-		"@yt-bot/config-jest": "*",
-		"@yt-bot/config-webpack": "*",
+		"@yt-bot/config-ts": "*",
 		"@yt-bot/eslint-config-yt-bot": "*",
 		"jest": "^29.3.1",
-		"ts-jest": "^29.0.3",
-		"ts-node": "^10.9.1",
 		"typescript": "^4.9.3"
-	}
+	},
+	"peerDependencies": {}
 }

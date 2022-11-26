@@ -1,6 +1,10 @@
 import { bundler, errorHandler } from '@yt-bot/config-webpack';
 import path from 'path';
 
+/**
+ * tsc was avoided because packages in this monorepo are pure typescript, and the js output would import ts files.
+ */
+
 export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 	entry: './src/index.ts',
 	output: {
@@ -12,7 +16,7 @@ export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 		node: true
 	},
 	externals: {
-		// Prisma goes here soon
+		'discord.js': 'commonjs discord.js'
 	},
 	module: {
 		rules: [
