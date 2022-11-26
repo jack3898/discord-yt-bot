@@ -1,5 +1,6 @@
 /* eslint-disable no-undef */
 module.exports = {
 	root: true,
-	extends: ['@yt-bot/eslint-config-yt-bot']
+	extends: ['@yt-bot/eslint-config-yt-bot'],
+	ignorePatterns: ['**/*.js', '**/*.d.ts']
 };
