@@ -2,6 +2,7 @@
 	"pipeline": {
 		"dev": { "cache": false },
 		"lint": { "cache": false },
-		"test": { "cache": false }
+		"test": { "cache": false },
+		"build": { "cache": false }
 	}
 }

@@ -1,0 +1,9 @@
+{
+	"extends": "@yt-bot/config-ts/tsconfig.base.json",
+	"compilerOptions": {
+		"declaration": true,
+		"rootDir": "src",
+		"outDir": "dist"
+	},
+	"exclude": ["**/*.test.ts", "**/*.spec.ts", "dist"]
+}
