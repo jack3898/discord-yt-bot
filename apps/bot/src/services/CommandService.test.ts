@@ -26,7 +26,7 @@ afterEach(() => {
 it('should register class tokens and retrieve them', () => {
 	commandService.registerClassToken(MockClass);
 
-	expect(nameSpy).toHaveBeenCalledTimes(1);
+	expect(nameSpy).toHaveBeenCalledTimes(2); // One to save it and the other for the console log
 
 	const foundInstance = commandService.getCommandInstanceBySlashCommandName('testcommand');
 

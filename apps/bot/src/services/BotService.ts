@@ -28,8 +28,6 @@ export class BotService extends Client {
 	registerInternalCommands() {
 		for (const commandToken of Object.values(this.commands)) {
 			this.commandService.registerClassToken(commandToken);
-
-			console.log(`🟩 Command "${commandToken.name}" loaded.`);
 		}
 	}
 

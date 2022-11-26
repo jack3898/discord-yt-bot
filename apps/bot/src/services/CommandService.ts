@@ -9,7 +9,11 @@ export class CommandService {
 	registerClassToken(commandClass: constructor<ICommand>) {
 		container.registerSingleton(commandClass);
 
-		this.commandInjectionTokens.set(container.resolve(commandClass).definition.name, commandClass);
+		const instance = container.resolve(commandClass);
+
+		this.commandInjectionTokens.set(instance.definition.name, commandClass);
+
+		console.log(`🟩 Command "${instance.definition.name}" loaded.`);
 	}
 
 	getCommandInstanceBySlashCommandName(commandName: string) {
