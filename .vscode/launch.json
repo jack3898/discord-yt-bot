@@ -5,7 +5,8 @@
 			"type": "node",
 			"request": "attach",
 			"name": "Debug Bot",
-			"skipFiles": ["<node_internals>/**"]
+			"skipFiles": ["<node_internals>/**"],
+			"restart": true
 		}
 	]
 }
