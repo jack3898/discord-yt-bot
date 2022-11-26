@@ -1,0 +1,24 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true,
+    "source.sortMembers": true,
+    "source.fixAll.eslint": true
+  },
+
+  "files.eol": "\n",
+  "files.trimTrailingWhitespace": true,
+
+  "eslint.validate": ["typescript", "javascript"],
+
+  "[prisma]": {
+    "editor.defaultFormatter": "Prisma.prisma"
+  },
+
+  "[json]":{
+    "editor.formatOnSave": true
+  },
+
+  "[jsonc]":{
+    "editor.formatOnSave": true
+  },
+}

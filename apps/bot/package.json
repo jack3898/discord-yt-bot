@@ -1,0 +1,36 @@
+{
+	"name": "@yt-bot/bot",
+	"private": true,
+	"version": "1.0.0",
+	"description": "The bot.",
+	"scripts": {
+		"dev": "ts-node src/index.ts",
+		"lint": "eslint **/*.ts",
+		"test": "jest"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
+	},
+	"author": "Jack Wright and contributors",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/jack3898/discord-yt-bot/issues"
+	},
+	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+	"engines": {
+		"node": "18.x"
+	},
+	"dependencies": {
+		"reflect-metadata": "^0.1.13",
+		"ts-node": "^10.9.1",
+		"tsyringe": "^4.7.0"
+	},
+	"peerDependencies": {},
+	"devDependencies": {
+		"@types/node": "*",
+		"@yt-bot/config-jest": "*",
+		"@yt-bot/eslint-config-yt-bot": "*",
+		"typescript": "^4.9.3"
+	}
+}

@@ -1,0 +1,27 @@
+{
+	"name": "@yt-bot/config-jest",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Shareable Jest config for automated testing.",
+	"main": "index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
+	},
+	"author": "Jack Wright and contributors",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/jack3898/discord-yt-bot/issues"
+	},
+	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+	"engines": {
+		"node": "18.x"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@types/jest": "^29.2.3",
+		"jest": "^29.3.1",
+		"ts-jest": "^29.0.3"
+	},
+	"peerDependencies": {}
+}

@@ -1,0 +1,36 @@
+{
+	"name": "@yt-bot/root",
+	"private": true,
+	"version": "1.0.0",
+	"description": "A TypeScript Discord YouTube bot.",
+	"scripts": {
+		"dev": "turbo run dev --parallel",
+		"lint": "turbo run lint --parallel",
+		"test": "turbo run test --parallel",
+		"pre-commit": "yarn run lint",
+		"install-husky": "husky install && git add .husky/pre-commit"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
+	},
+	"author": "Jack Wright and contributors",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/jack3898/discord-yt-bot/issues"
+	},
+	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+	"engines": {
+		"node": "18.x"
+	},
+	"dependencies": {
+		"turbo": "^1.6.3"
+	},
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
+	"devDependencies": {
+		"husky": "^8.0.2"
+	}
+}

@@ -1,0 +1,5 @@
+# node (use yarn)
+node_modules
+package-lock.json
+.env
+yarn-error.log

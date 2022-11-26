@@ -1,0 +1,31 @@
+{
+  "name": "@yt-bot/eslint-config-yt-bot",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Shareable eslint config.",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jack3898/discord-yt-bot.git"
+  },
+  "author": "Jack Wright and contributors",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/jack3898/discord-yt-bot/issues"
+  },
+  "homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+  "engines": {
+    "node": "18.x"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.44.0",
+    "@typescript-eslint/parser": "^5.44.0",
+    "eslint": "^8.28.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.3"
+  },
+  "peerDependencies": {}
+}

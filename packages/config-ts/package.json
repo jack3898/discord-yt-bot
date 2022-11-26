@@ -1,0 +1,23 @@
+{
+	"name": "@yt-bot/config-ts",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Shareable typescript config.",
+	"scripts": {},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
+	},
+	"author": "Jack Wright and contributors",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/jack3898/discord-yt-bot/issues"
+	},
+	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+	"engines": {
+		"node": "18.x"
+	},
+	"dependencies": {},
+	"devDependencies": {},
+	"peerDependencies": {}
+}
