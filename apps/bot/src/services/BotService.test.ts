@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { container } from 'tsyringe';
-import { BotService } from './BotService';
-import { RestService } from './RestService';
+import { BotService, RestService } from '.';
 
 afterEach(() => container.reset());
 

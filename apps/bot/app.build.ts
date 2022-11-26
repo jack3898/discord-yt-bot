@@ -16,7 +16,9 @@ export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 		node: true
 	},
 	externals: {
-		'discord.js': 'commonjs discord.js'
+		'discord.js': 'commonjs discord.js',
+		'@discordjs/voice': 'commonjs @discordjs/voice',
+		'ffmpeg-static': 'tweetnacl'
 	},
 	module: {
 		rules: [
