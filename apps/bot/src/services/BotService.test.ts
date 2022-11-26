@@ -1,6 +1,6 @@
 import { container } from 'tsyringe';
-import { Bot } from './Bot';
-import { Rest } from './Rest';
+import { BotService } from './BotService';
+import { RestService } from './RestService';
 
 afterEach(() => container.reset());
 
@@ -23,9 +23,9 @@ describe('registerSlashCommands method', () => {
 			}
 		}
 
-		container.registerSingleton(Rest, MockRest as any);
+		container.registerSingleton(RestService, MockRest as any);
 
-		const bot = container.resolve(Bot);
+		const bot = container.resolve(BotService);
 
 		await bot.registerSlashCommands();
 
@@ -51,9 +51,9 @@ describe('registerSlashCommands method', () => {
 			}
 		}
 
-		container.registerSingleton(Rest, MockRest as any);
+		container.registerSingleton(RestService, MockRest as any);
 
-		const bot = container.resolve(Bot);
+		const bot = container.resolve(BotService);
 
 		expect(bot.registerSlashCommands()).rejects.toBeInstanceOf(Error);
 	});

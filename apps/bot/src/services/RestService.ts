@@ -3,7 +3,7 @@ import { REST, Routes } from 'discord.js';
 import { singleton } from 'tsyringe';
 
 @singleton()
-export class Rest extends REST {
+export class RestService extends REST {
 	constructor() {
 		super();
 

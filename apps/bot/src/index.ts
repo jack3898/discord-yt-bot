@@ -1,9 +1,9 @@
 import { DISCORD_TOKEN } from '@yt-bot/env';
 import 'reflect-metadata';
 import { container } from 'tsyringe';
-import { Bot } from './services/Bot';
+import { BotService } from './services/BotService';
 
-const bot = container.resolve(Bot);
+const bot = container.resolve(BotService);
 
 bot.login(DISCORD_TOKEN);
 

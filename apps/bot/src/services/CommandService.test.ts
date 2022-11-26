@@ -1,9 +1,9 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { container } from 'tsyringe';
 import { ICommand } from '../types/ICommand';
-import { Command } from './Command';
+import { CommandService } from './CommandService';
 
-const commandService = container.resolve(Command);
+const commandService = container.resolve(CommandService);
 
 const nameSpy = jest.fn();
 

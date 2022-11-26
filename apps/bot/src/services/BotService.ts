@@ -1,14 +1,14 @@
 import { Client, GatewayIntentBits } from 'discord.js';
 import { singleton } from 'tsyringe';
 import * as commands from '../commands';
-import { Command } from './Command';
-import { Rest } from './Rest';
+import { CommandService } from './CommandService';
+import { RestService } from './RestService';
 
 @singleton()
-export class Bot extends Client {
+export class BotService extends Client {
 	commands = { ...commands };
 
-	constructor(public commandService: Command, public restService: Rest) {
+	constructor(public commandService: CommandService, public restService: RestService) {
 		super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 	}
 

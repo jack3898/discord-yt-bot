@@ -3,7 +3,7 @@ import { constructor } from 'tsyringe/dist/typings/types';
 import { ICommand } from '../types/ICommand';
 
 @singleton()
-export class Command {
+export class CommandService {
 	commandInjectionTokens = new Map<string, InjectionToken<ICommand>>();
 
 	registerClassToken(commandClass: constructor<ICommand>) {
