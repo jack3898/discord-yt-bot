@@ -4,5 +4,5 @@ const jestConfig = require('@yt-bot/config-jest');
 
 module.exports = {
 	...jestConfig,
-	setupFilesAfterEnv: ['<rootDir>/setupTest.ts']
+	setupFilesAfterEnv: ['<rootDir>/setupTest.ts'],
 };
