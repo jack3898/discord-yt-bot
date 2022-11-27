@@ -4,8 +4,6 @@ import { YouTubeService } from './YouTubeService';
 
 const youtubeService = container.resolve(YouTubeService);
 
-const ytdlGetBasicInfoMock = jest.fn();
-
 jest.mock('ytdl-core-discord', () => ({
 	// __esModule: true,
 	...jest.requireActual('ytdl-core-discord'),

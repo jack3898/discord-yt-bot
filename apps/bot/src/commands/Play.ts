@@ -1,4 +1,4 @@
-import { createAudioPlayer } from '@discordjs/voice';
+import { AudioPlayerStatus, createAudioPlayer } from '@discordjs/voice';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { BotService } from '../services';
@@ -59,6 +59,19 @@ export class Play implements ICommand {
 			const player = createAudioPlayer();
 
 			voiceConnection.subscribe(player);
+
+			// Do not worry! Does not cause a memory leak
+			// Unless the console.log is ran two or more times for a single connection 🤔
+			player.on('stateChange', (oldState, newState) => {
+				const wasPlaying = oldState.status === AudioPlayerStatus.Playing;
+				const isIdle = newState.status === AudioPlayerStatus.Idle;
+
+				if (wasPlaying && isIdle) {
+					voiceConnection.destroy();
+
+					console.log(`🟨 Voice connection destroyed for guild ${interaction.guild.name}.`);
+				}
+			});
 
 			player.play(stream);
 
