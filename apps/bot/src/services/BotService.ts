@@ -1,4 +1,3 @@
-import { getVoiceConnection, joinVoiceChannel } from '@discordjs/voice';
 import { Client, GatewayIntentBits } from 'discord.js';
 import { singleton } from 'tsyringe';
 import { CommandService } from './CommandService';
@@ -45,14 +44,5 @@ export class BotService extends Client {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			throw new Error(error as any);
 		}
-	}
-
-	/**
-	 * Abstraction over the official join voice channel implementation. This will return an existing connection if one is found.
-	 */
-	joinVoiceChannel(...params: Parameters<typeof joinVoiceChannel>) {
-		const currentConnection = getVoiceConnection(params[0].guildId);
-
-		return currentConnection ? currentConnection : joinVoiceChannel(...params);
 	}
 }

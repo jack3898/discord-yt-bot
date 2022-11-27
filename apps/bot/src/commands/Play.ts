@@ -1,4 +1,4 @@
-import { AudioPlayerStatus, createAudioPlayer } from '@discordjs/voice';
+import { AudioPlayerStatus, createAudioPlayer, joinVoiceChannel } from '@discordjs/voice';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { BotService } from '../services';
@@ -48,7 +48,7 @@ export class Play implements ICommand {
 				});
 			}
 
-			const voiceConnection = this.botService.joinVoiceChannel({
+			const voiceConnection = joinVoiceChannel({
 				guildId: interaction.guildId,
 				channelId: voiceChannel.id,
 				adapterCreator: voiceChannel.guild.voiceAdapterCreator
