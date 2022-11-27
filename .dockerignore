@@ -1,0 +1,7 @@
+node_modules
+yarn-error.lock
+.vscode
+.docker
+dist
+.env
+**/*.db

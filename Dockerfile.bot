@@ -1,0 +1,13 @@
+# Please satisfy the environment variables in .env except guild id.
+
+FROM node:18
+
+USER node
+
+WORKDIR /home/node
+
+COPY --chown=node . .
+
+RUN yarn install
+
+CMD ["yarn", "run", "start"]
