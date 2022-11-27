@@ -55,13 +55,14 @@ export class Play implements ICommand {
 			});
 
 			const stream = await this.youtubeService.createAudioResourceFromUrl(url);
+			const [info] = await this.youtubeService.getVideoInfos(url);
 			const player = createAudioPlayer();
 
 			voiceConnection.subscribe(player);
 
 			player.play(stream);
 
-			interaction.reply('Playing!');
+			interaction.reply(`Now playing \`${info.videoDetails.title}\``);
 		} catch (error) {
 			console.error(error);
 

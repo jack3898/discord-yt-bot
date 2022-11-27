@@ -12,7 +12,7 @@ export class YouTubeService {
 	 * - Search term (not yet implemented)
 	 * - Playlist URL (not yet implemented)
 	 */
-	getVideoUrls(resource: string): (string | undefined)[] {
+	getVideoUrls(resource: string): string[] {
 		if (ytdl.validateURL(resource)) {
 			return [resource];
 		} else if (ytdl.validateID(resource)) {
@@ -28,9 +28,21 @@ export class YouTubeService {
 		const bitstream = await ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 });
 
 		if (!bitstream) {
-			throw Error('Failed to download resource.');
+			throw Error('Failed to create stream.');
 		}
 
 		return createAudioResource(bitstream);
+	}
+
+	/**
+	 * Takes in a resource and normalises it to an array of video details objects.
+	 * The resource may be one of:
+	 * - Video ID
+	 * - URL (shortened or normal)
+	 * - Search term (not yet implemented)
+	 * - Playlist URL (not yet implemented)
+	 */
+	getVideoInfos(resource: string) {
+		return Promise.all(this.getVideoUrls(resource).map((url) => ytdl.getBasicInfo(url)));
 	}
 }
