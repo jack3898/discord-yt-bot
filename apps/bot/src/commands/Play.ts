@@ -19,17 +19,17 @@ export class Play implements ICommand {
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
-			const guildMember = interaction.member;
-			const voiceChannel = guildMember.voice.channel;
+			const commandAuthor = interaction.member;
+			const commandAuthorVoiceChannel = commandAuthor.voice.channel;
 
-			if (!voiceChannel?.id) {
+			if (!commandAuthorVoiceChannel?.id) {
 				return void interaction.reply({
 					content: 'You must be connected to a voice channel to use this command.',
 					ephemeral: true
 				});
 			}
 
-			const commandAuthorCanSpeak = voiceChannel.permissionsFor(guildMember).has('Speak');
+			const commandAuthorCanSpeak = commandAuthorVoiceChannel.permissionsFor(commandAuthor).has('Speak');
 
 			if (!commandAuthorCanSpeak) {
 				return void interaction.reply({
@@ -48,32 +48,32 @@ export class Play implements ICommand {
 				});
 			}
 
-			const voiceConnection = joinVoiceChannel({
+			const botVoiceConnection = joinVoiceChannel({
 				guildId: interaction.guildId,
-				channelId: voiceChannel.id,
-				adapterCreator: voiceChannel.guild.voiceAdapterCreator
+				channelId: commandAuthorVoiceChannel.id,
+				adapterCreator: commandAuthorVoiceChannel.guild.voiceAdapterCreator
 			});
 
 			const stream = await this.youtubeService.createAudioResourceFromUrl(url);
 			const [info] = await this.youtubeService.getVideoInfos(url);
-			const player = createAudioPlayer();
+			const audioPlayer = createAudioPlayer();
 
-			voiceConnection.subscribe(player);
+			botVoiceConnection.subscribe(audioPlayer);
 
 			// Do not worry! Does not cause a memory leak
 			// Unless the console.log is ran two or more times for a single connection 🤔
-			player.on('stateChange', (oldState, newState) => {
+			audioPlayer.on('stateChange', (oldState, newState) => {
 				const wasPlaying = oldState.status === AudioPlayerStatus.Playing;
 				const isIdle = newState.status === AudioPlayerStatus.Idle;
 
 				if (wasPlaying && isIdle) {
-					voiceConnection.destroy();
+					botVoiceConnection.destroy();
 
 					console.log(`🟨 Voice connection destroyed for guild ${interaction.guild.name}.`);
 				}
 			});
 
-			player.play(stream);
+			audioPlayer.play(stream);
 
 			interaction.reply(`Now playing \`${info.videoDetails.title}\``);
 		} catch (error) {
