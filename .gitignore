@@ -4,3 +4,7 @@ package-lock.json
 .env
 yarn-error.log
 dist
+
+# kubernetes
+.kubernetes/*
+!.kubernetes/deployment.bot.example.yaml

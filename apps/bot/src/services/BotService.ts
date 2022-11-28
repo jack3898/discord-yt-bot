@@ -6,7 +6,11 @@ import { RestService } from './RestService';
 @singleton()
 export class BotService extends Client {
 	constructor(public commandService: CommandService, public restService: RestService) {
-		super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+		super({
+			intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+			shardCount: 1,
+			shards: 0
+		});
 	}
 
 	registerEvents() {
