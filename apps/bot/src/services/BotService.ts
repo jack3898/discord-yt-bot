@@ -2,20 +2,25 @@ import { Client, GatewayIntentBits } from 'discord.js';
 import { singleton } from 'tsyringe';
 import { CommandService } from './CommandService';
 import { RestService } from './RestService';
+import { ShardManagerService } from './ShardManagerService';
 
 @singleton()
 export class BotService extends Client {
-	constructor(public commandService: CommandService, public restService: RestService) {
+	constructor(
+		public commandService: CommandService,
+		public restService: RestService,
+		public shardManagerService: ShardManagerService
+	) {
 		super({
 			intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
-			shardCount: 1,
-			shards: 0
+			shardCount: shardManagerService.shardCount,
+			shards: shardManagerService.shardId
 		});
 	}
 
 	registerEvents() {
 		this.once('ready', () => {
-			console.log('🟩 Bot online.');
+			console.log(`🟩 Bot logged in as ${this.user?.username}.`);
 		});
 
 		// Command interactions

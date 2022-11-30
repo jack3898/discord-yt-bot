@@ -1,0 +1,32 @@
+{
+	"name": "@yt-bot/shard-manager",
+	"private": true,
+	"version": "1.0.0",
+	"description": "Allow the bot replicas to establish sharding information for scalability.",
+	"main": "src/index.ts",
+	"scripts": {
+		"dev": "nodemon --watch src --exec \"node --inspect=0.0.0.0:9230 --require ts-node/register\" src/server.ts",
+		"start": "ts-node src/server.ts"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
+	},
+	"author": "Jack Wright and contributors",
+	"license": "GPL-3.0",
+	"bugs": {
+		"url": "https://github.com/jack3898/discord-yt-bot/issues"
+	},
+	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+	"engines": {
+		"node": "18.x"
+	},
+	"dependencies": {
+		"@yt-bot/env": "*",
+		"socket.io": "^4.5.4"
+	},
+	"devDependencies": {
+		"@yt-bot/config-ts": "*"
+	},
+	"peerDependencies": {}
+}

@@ -2,4 +2,5 @@
 export { BotService } from './BotService';
 export { CommandService } from './CommandService';
 export { RestService } from './RestService';
+export { ShardManagerService } from './ShardManagerService';
 

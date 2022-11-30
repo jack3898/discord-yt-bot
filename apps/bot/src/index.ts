@@ -2,11 +2,20 @@ import 'reflect-metadata';
 
 import { DISCORD_TOKEN } from '@yt-bot/env';
 import { container } from 'tsyringe';
-import { BotService } from './services';
-
-const bot = container.resolve(BotService);
+import { BotService, ShardManagerService } from './services';
 
 const run = async () => {
+	const shardManagerService = container.resolve(ShardManagerService);
+
+	if (shardManagerService.enabled) {
+		console.log('🟩 Shard manager initialised.');
+
+		await shardManagerService.awaitShardId();
+	}
+
+	const bot = container.resolve(BotService);
+
+	// console.log(allocation);
 	bot.login(DISCORD_TOKEN);
 
 	// Global bot event listeners
