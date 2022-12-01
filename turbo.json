@@ -4,6 +4,7 @@
 		"lint": { "cache": false },
 		"test": { "cache": false },
 		"build": { "cache": false },
-		"start": { "cache": false }
+		"start": { "cache": false },
+		"prune": { "cache": false }
 	}
 }

@@ -6,7 +6,7 @@ import path from 'path';
  */
 
 export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
-	entry: './src/index.ts',
+	entry: './src/server.ts',
 	output: {
 		path: path.resolve(__dirname, 'dist'),
 		filename: 'app.js'
@@ -16,10 +16,7 @@ export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 		node: true
 	},
 	externals: {
-		'discord.js': 'commonjs discord.js',
-		'@discordjs/voice': 'commonjs @discordjs/voice',
-		'prism-media': 'commonjs prism-media',
-		'socket.io-client': 'commonjs socket.io-client'
+		'socket.io': 'commonjs socket.io'
 	},
 	module: {
 		rules: [

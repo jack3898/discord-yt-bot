@@ -9,11 +9,12 @@
 		"test": "turbo run test --parallel",
 		"test:watch": "turbo run test --parallel -- --watch",
 		"build": "turbo run build --parallel",
-		"start": "turbo run start --parallel",
+		"start": "turbo run start --filter=$SCOPE",
 		"start:build": "yarn run build && yarn run start",
 		"pre-commit": "yarn run lint",
 		"install-husky": "husky install && git add .husky/pre-commit",
-		"postinstall": "yarn run build"
+		"postinstall": "yarn run build",
+		"prune": "turbo prune"
 	},
 	"repository": {
 		"type": "git",

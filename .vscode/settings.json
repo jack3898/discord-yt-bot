@@ -1,24 +1,29 @@
 {
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true,
-    "source.sortMembers": true,
-    "source.fixAll.eslint": true
-  },
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": true,
+		"source.sortMembers": true,
+		"source.fixAll.eslint": true
+	},
 
-  "files.eol": "\n",
-  "files.trimTrailingWhitespace": true,
+	"files.eol": "\n",
+	"files.trimTrailingWhitespace": true,
 
-  "eslint.validate": ["typescript", "javascript"],
+	"eslint.validate": ["typescript", "javascript"],
 
-  "[prisma]": {
-    "editor.defaultFormatter": "Prisma.prisma"
-  },
+	"[prisma]": {
+		"editor.defaultFormatter": "Prisma.prisma"
+	},
 
-  "[json]":{
-    "editor.formatOnSave": true
-  },
+	"[json]": {
+		"editor.formatOnSave": true
+	},
 
-  "[jsonc]":{
-    "editor.formatOnSave": true
-  },
+	"[jsonc]": {
+		"editor.formatOnSave": true
+	},
+
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"editor.formatOnSave": true
+	}
 }

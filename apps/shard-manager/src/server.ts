@@ -1,17 +1,17 @@
-import { SHARD_MANAGER_URL } from '@yt-bot/env';
+import { SHARDS, SHARD_MANAGER_URL } from '@yt-bot/env';
 import { Server } from 'socket.io';
 import { ClientToServerEvents as C2S, InterServerEvents, ServerToClientEvents as S2C, SocketData } from '../types/socket';
 import { AllocationManager } from './AllocationManager';
 
-if (!SHARD_MANAGER_URL) {
-	console.error('🟥 SHARD_MANAGER_URL not in environment. Please add it. Exiting...');
+if (!SHARD_MANAGER_URL || !SHARDS) {
+	console.error('🟥 SHARD_MANAGER_URL or SHARDS env vars not in environment. Please check them. Exiting...');
 
 	process.exit(1);
 }
 
 const io = new Server<C2S, S2C, InterServerEvents, SocketData>(+SHARD_MANAGER_URL.port);
 
-const allocationManager = new AllocationManager(3);
+const allocationManager = new AllocationManager(SHARDS);
 
 io.on('connection', () => {
 	io.sockets.once('connection', (socket) => {
@@ -34,4 +34,4 @@ io.on('connection', () => {
 	});
 });
 
-console.log('🟩 Shard manager online.');
+console.log(`🟩 Shard manager online. Ready to allocate up to ${SHARDS} shards.`);
