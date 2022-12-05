@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ytbot-dotenv-file
+stringData:
+  .env: |
+    NODE_ENV=production
+    DISCORD_TOKEN=[YOUR TOKEN HERE]
+    CLIENT_ID=[YOUR CLIENT ID HERE]
+    SHARD_MANAGER_URL=http://ytbot-sm:3000
+    SHARDS=3

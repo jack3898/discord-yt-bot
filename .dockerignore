@@ -2,6 +2,7 @@ node_modules
 yarn-error.lock
 .vscode
 .docker
+.kubernetes
 dist
 .env
 **/*.db

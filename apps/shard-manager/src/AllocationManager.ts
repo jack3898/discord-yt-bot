@@ -30,4 +30,8 @@ export class AllocationManager {
 	deallocate(seatNumber: number) {
 		this.seats[seatNumber] = 'VACANT';
 	}
+
+	get full() {
+		return this.seats.every((seat) => seat !== 'VACANT');
+	}
 }

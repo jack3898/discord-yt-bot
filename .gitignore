@@ -5,6 +5,4 @@ package-lock.json
 yarn-error.log
 dist
 
-# kubernetes
-.kubernetes/*
-!.kubernetes/deployment.bot.example.yaml
+.kubernetes/*.config.yml

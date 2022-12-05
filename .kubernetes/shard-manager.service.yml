@@ -1,0 +1,13 @@
+# SHARD MANAGER APPLICATION SERVICE
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ytbot-sms
+spec:
+  selector:
+    app: ytbot-shard-manager
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

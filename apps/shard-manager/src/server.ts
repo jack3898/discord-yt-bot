@@ -22,7 +22,7 @@ io.on('connection', () => {
 			return socket.emit('shard_deny');
 		}
 
-		console.log(`🟩 Allocated seat ${allocation} for socket id ${socket.id}.`);
+		console.log(`🟨 Allocated seat ${allocation} for socket id ${socket.id}.`);
 
 		socket.emit('shard_info', allocation, allocationManager.totalSeats);
 
@@ -31,6 +31,10 @@ io.on('connection', () => {
 
 			allocationManager.deallocate(allocation);
 		});
+
+		if (allocationManager.full) {
+			console.log('🟩 All seats taken!');
+		}
 	});
 });
 

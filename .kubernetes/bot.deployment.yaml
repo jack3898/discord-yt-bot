@@ -1,0 +1,36 @@
+# BOT DEPLOYMENTS
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ytbot-bot
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: ytbot
+  template:
+    metadata:
+      labels:
+        app: ytbot
+    spec:
+      containers:
+        - name: ytbot
+          image: ytbot-bot
+          imagePullPolicy: Never
+          env:
+            - name: SHARD_MANAGER_URL
+              value: http://ytbot-sms:3000
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "0.5"
+          volumeMounts:
+            - name: ytbot-dotenv
+              mountPath: /home/node/.env
+              subPath: .env
+              readOnly: true
+      volumes:
+        - name: ytbot-dotenv
+          secret:
+            secretName: ytbot-dotenv-file

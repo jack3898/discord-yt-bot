@@ -8,7 +8,9 @@ const run = async () => {
 	const shardManagerService = container.resolve(ShardManagerService);
 
 	if (shardManagerService.enabled) {
-		console.log('🟩 Shard manager initialised.');
+		console.log('🟩 Shard manager client initialised.');
+
+		shardManagerService.handleIdle();
 
 		await shardManagerService.awaitShardId();
 	}

@@ -14,7 +14,8 @@
 		"pre-commit": "yarn run lint",
 		"install-husky": "husky install && git add .husky/pre-commit",
 		"postinstall": "yarn run build",
-		"prune": "turbo prune"
+		"prune": "turbo prune",
+		"kube-apply": "kubectl apply -f .kubernetes -R"
 	},
 	"repository": {
 		"type": "git",
