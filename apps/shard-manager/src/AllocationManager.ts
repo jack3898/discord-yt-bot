@@ -1,9 +1,9 @@
 export class AllocationManager {
-	private seats: ('VACANT' | Omit<string, 'VACANT'>)[];
+	private seats: (null | string)[]; // Null is an empty seat
 	public totalSeats: number;
 
 	constructor(seatCount: number) {
-		this.seats = new Array(seatCount).fill('VACANT');
+		this.seats = new Array(seatCount).fill(null);
 
 		this.totalSeats = seatCount;
 	}
@@ -11,7 +11,7 @@ export class AllocationManager {
 	private find(forId: string) {
 		const existingAllocation = this.seats.indexOf(forId);
 
-		return existingAllocation !== -1 ? existingAllocation : this.seats.indexOf('VACANT');
+		return existingAllocation !== -1 ? existingAllocation : this.seats.indexOf(null);
 	}
 
 	private allocate(seatNumber: number, forId: string) {
@@ -28,10 +28,10 @@ export class AllocationManager {
 	}
 
 	deallocate(seatNumber: number) {
-		this.seats[seatNumber] = 'VACANT';
+		this.seats[seatNumber] = null;
 	}
 
 	get full() {
-		return this.seats.every((seat) => seat !== 'VACANT');
+		return this.seats.every((seat) => seat !== null);
 	}
 }

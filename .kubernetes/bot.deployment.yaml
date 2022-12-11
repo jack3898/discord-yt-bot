@@ -17,7 +17,7 @@ spec:
       containers:
         - name: ytbot
           image: ytbot-bot
-          imagePullPolicy: Never
+          imagePullPolicy: IfNotPresent
           env:
             - name: SHARD_MANAGER_URL
               value: http://ytbot-sms:3000

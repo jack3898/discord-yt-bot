@@ -4,7 +4,8 @@ import { ClientToServerEvents as C2S, InterServerEvents, ServerToClientEvents as
 import { AllocationManager } from './AllocationManager';
 
 if (!SHARD_MANAGER_URL || !SHARDS) {
-	console.error('🟥 SHARD_MANAGER_URL or SHARDS env vars not in environment. Please check them. Exiting...');
+	console.log('🟨 SHARD_MANAGER_URL or SHARDS env vars not in environment. Exiting...');
+	console.log('If the bot is not sharded, then you can ignore this message.');
 
 	process.exit(1);
 }
