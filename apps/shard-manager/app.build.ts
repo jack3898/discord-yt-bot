@@ -15,9 +15,6 @@ export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 	externalsPresets: {
 		node: true
 	},
-	externals: {
-		'socket.io': 'commonjs socket.io'
-	},
 	module: {
 		rules: [
 			{

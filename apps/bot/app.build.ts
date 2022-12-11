@@ -15,12 +15,6 @@ export const webpackBackendConfig: Parameters<typeof bundler>[0] = {
 	externalsPresets: {
 		node: true
 	},
-	externals: {
-		'discord.js': 'commonjs discord.js',
-		'@discordjs/voice': 'commonjs @discordjs/voice',
-		'prism-media': 'commonjs prism-media',
-		'socket.io-client': 'commonjs socket.io-client'
-	},
 	module: {
 		rules: [
 			{
