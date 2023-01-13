@@ -13,11 +13,11 @@ export const webpackConfig: WebpackConfig = {
 		({ request: moduleName = '' }, callback) => {
 			// "If the package is local, bundle it."
 			if (isLocal.test(moduleName)) {
-				console.log(`📦 ${moduleName}`);
+				console.log(`📦 ${moduleName} (bundled)`);
 				return callback();
 			}
 
-			console.log(`👽 ${moduleName}`);
+			console.log(`👽 ${moduleName} (external)`);
 			callback(undefined, `commonjs ${moduleName}`);
 		}
 	]
