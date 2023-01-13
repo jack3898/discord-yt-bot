@@ -27,7 +27,7 @@ describe('registerSlashCommands method', () => {
 
 		const bot = container.resolve(BotService);
 
-		await bot.registerSlashCommands();
+		await bot.registerSlashCommands([]);
 
 		expect(routeSpy).toHaveBeenCalledTimes(1);
 		expect(putSpy).toHaveBeenCalledTimes(1);
@@ -55,6 +55,6 @@ describe('registerSlashCommands method', () => {
 
 		const bot = container.resolve(BotService);
 
-		expect(bot.registerSlashCommands()).rejects.toBeInstanceOf(Error);
+		expect(bot.registerSlashCommands([])).rejects.toBeInstanceOf(Error);
 	});
 });

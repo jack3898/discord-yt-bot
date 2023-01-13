@@ -6,6 +6,10 @@ import { io, Socket } from 'socket.io-client';
 import { singleton } from 'tsyringe';
 import { RestService } from './RestService';
 
+/**
+ * When running multiple bot processes, a shard manager is required to assign each process a shard id.
+ * This is a service to communicate with that shard manager. Isn't used if you plan to use one bot process.
+ */
 @singleton()
 export class ShardManagerService {
 	io?: Socket<ServerToClientEvents, ClientToServerEvents>;

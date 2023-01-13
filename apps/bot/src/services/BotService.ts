@@ -1,9 +1,14 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { singleton } from 'tsyringe';
 import { CommandService } from './CommandService';
 import { RestService } from './RestService';
 import { ShardManagerService } from './ShardManagerService';
 
+/**
+ * The bot service is a minor extension to the base Discord.Client class.
+ * All it does is some minor bootstrapping when it is first constructed.
+ * It is a singleton, so should be the only instance.
+ */
 @singleton()
 export class BotService extends Client {
 	constructor(
@@ -18,6 +23,9 @@ export class BotService extends Client {
 		});
 	}
 
+	/**
+	 * Registers required event listeners for various bot events.
+	 */
 	registerEvents() {
 		this.once('ready', () => {
 			console.log(`🟩 Bot logged in as ${this.user?.username}.`);
@@ -31,6 +39,10 @@ export class BotService extends Client {
 		});
 	}
 
+	/**
+	 * Creates class instances of the commands in the commands directory, and registers
+	 * them to the tsyringe container for use with the CommandService.
+	 */
 	async registerInternalCommands() {
 		const importedCommands = await import('../commands');
 		const commands = { ...importedCommands };
@@ -40,11 +52,12 @@ export class BotService extends Client {
 		}
 	}
 
-	async registerSlashCommands() {
+	/**
+	 * Publishes commands from the CommandService to the Discord API for use as slash commands.
+	 */
+	async registerSlashCommands(commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]) {
 		try {
-			const payload = this.commandService.getCommandBuildersAsJson();
-
-			await this.restService.put(this.restService.commandsRoute, { body: payload });
+			await this.restService.put(this.restService.commandsRoute, { body: commands });
 
 			console.log('🟩 Slash commands registered to the Discord API.');
 		} catch (error: unknown) {

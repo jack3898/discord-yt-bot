@@ -2,10 +2,14 @@ import 'reflect-metadata';
 
 import { DISCORD_TOKEN } from '@yt-bot/env';
 import { container } from 'tsyringe';
-import { BotService, ShardManagerService } from './services';
+import { BotService, CommandService, ShardManagerService } from './services';
 
-const run = async () => {
+/**
+ * Entry to the app.
+ */
+async function main() {
 	const shardManagerService = container.resolve(ShardManagerService);
+	const commandService = container.resolve(CommandService);
 
 	if (shardManagerService.enabled) {
 		console.log('🟩 Shard manager client initialised.');
@@ -27,7 +31,7 @@ const run = async () => {
 	await bot.registerInternalCommands();
 
 	// Publish slash commands to the Discord API. Must come after internal slash command registrations
-	await bot.registerSlashCommands();
-};
+	await bot.registerSlashCommands(commandService.getCommandBuildersAsJson());
+}
 
-run();
+main();

@@ -2,6 +2,10 @@ import { container, InjectionToken, singleton } from 'tsyringe';
 import { constructor } from 'tsyringe/dist/typings/types';
 import { ICommand } from '../types/ICommand';
 
+/**
+ * The command service ties up the commands in the commands directory.
+ * References to "tokens" are from tsyringe.
+ */
 @singleton()
 export class CommandService {
 	commandInjectionTokens = new Map<string, InjectionToken<ICommand>>();

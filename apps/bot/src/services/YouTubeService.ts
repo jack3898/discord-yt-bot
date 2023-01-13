@@ -2,6 +2,9 @@ import { createAudioResource } from '@discordjs/voice';
 import { singleton } from 'tsyringe';
 import ytdl from 'ytdl-core-discord';
 
+/**
+ * Uses ytdl, @Discord.js/voice and the YouTube API to provide a simple abstraction for everything YouTube.
+ */
 @singleton()
 export class YouTubeService {
 	/**
