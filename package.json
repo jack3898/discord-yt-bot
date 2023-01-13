@@ -5,18 +5,22 @@
     "description": "A TypeScript Discord YouTube bot.",
     "scripts": {
         "dev": "turbo run dev --parallel",
+        "init": "yarn install && yarn run build && yarn run db:push",
         "lint": "turbo run lint --parallel",
         "test": "turbo run test --parallel",
         "test:watch": "turbo run test --parallel -- --watch",
         "build": "turbo run build --parallel",
         "start": "turbo run start --filter=$SCOPE",
-        "start-all": "turbo run start --parallel",
+        "start:all": "turbo run start --parallel",
         "start:build": "yarn run build && yarn run start",
         "pre-commit": "yarn run lint",
         "install-husky": "husky install && git add .husky/pre-commit",
-        "postinstall": "yarn run build && yarn run install-husky",
+        "postinstall": "yarn run install-husky",
         "prune": "turbo prune",
-        "kube-apply": "kubectl apply -f .kubernetes -R"
+        "kube-apply": "kubectl apply -f .kubernetes -R",
+        "db:generate": "turbo run build --filter=database",
+        "db:push": "turbo run db-push",
+        "db:studio": "turbo run db-studio"
     },
     "repository": {
         "type": "git",

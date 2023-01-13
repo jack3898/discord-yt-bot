@@ -6,3 +6,5 @@ yarn-error.log
 dist
 
 .kubernetes/*.config.yml
+
+*.db

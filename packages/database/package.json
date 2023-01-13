@@ -5,7 +5,9 @@
     "description": "Database service for this bot.",
     "main": "src/index.ts",
     "scripts": {
-        "build": "prisma generate"
+        "build": "prisma generate",
+        "db-push": "prisma db push",
+        "db-studio": "prisma studio"
     },
     "repository": {
         "type": "git",

@@ -4,6 +4,16 @@ The third one!
 
 This README will look much nicer in the future, but for now it's a place to jot notes for development.
 
+## Getting started as a developer
+
+-   Clone the repository
+-   Run `npm install -g yarn`
+-   Run `yarn run init` to install the repo, and build dependencies
+-   Run `cp .env.example .env` to copy the example env file to a new .env
+-   Satisfy env details
+-   Run `yarn run dev`
+-   Done!
+
 ## Build Docker images
 
 ### Build requirements

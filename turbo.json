@@ -1,10 +1,12 @@
 {
-	"pipeline": {
-		"dev": { "cache": false },
-		"lint": { "cache": false },
-		"test": { "cache": false },
-		"build": { "cache": false },
-		"start": { "cache": false },
-		"prune": { "cache": false }
-	}
+    "pipeline": {
+        "dev": { "cache": false },
+        "lint": { "cache": false },
+        "test": { "cache": false },
+        "build": { "cache": false },
+        "start": { "cache": false },
+        "prune": { "cache": false },
+        "db-push": { "cache": false },
+        "db-studio": { "cache": false }
+    }
 }
