@@ -11,14 +11,14 @@ datasource db {
 }
 
 model DiscordUser {
-  id      Int      @id()
+  id      String   @id() // provided by Discord user id
   created DateTime @default(now())
   updated DateTime @updatedAt()
   Queue   Queue[]
 }
 
 model DiscordGuild {
-  id      Int      @id()
+  id      String   @id() // provided by Discord guild id
   created DateTime @default(now())
   updated DateTime @updatedAt()
   Queue   Queue[]
@@ -29,9 +29,9 @@ model Queue {
   created        DateTime      @default(now())
   updated        DateTime      @updatedAt()
   discordUser    DiscordUser?  @relation(fields: [discordUserId], references: [id])
-  discordUserId  Int?
+  discordUserId  String?
   discordGuild   DiscordGuild? @relation(fields: [discordGuildId], references: [id])
-  discordGuildId Int?
+  discordGuildId String?
   resource       Resource      @relation(fields: [resourceId], references: [id])
   resourceId     Int
 }
