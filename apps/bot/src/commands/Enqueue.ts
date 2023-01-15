@@ -1,7 +1,7 @@
-import { RESOURCE_TYPES } from '@yt-bot/constants';
+import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
-import { BotService, DatabaseService, ShardManagerService } from '../services';
+import { BotService, DatabaseService, QueueService, ShardManagerService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -11,7 +11,8 @@ export class Enqueue implements ICommand {
 		public botService: BotService,
 		public shardManagerService: ShardManagerService,
 		public dbService: DatabaseService,
-		public youtubeService: YouTubeService
+		public youtubeService: YouTubeService,
+		public queueService: QueueService
 	) {}
 
 	definition = new SlashCommandBuilder()
@@ -33,10 +34,16 @@ export class Enqueue implements ICommand {
 				});
 			}
 
-			await this.dbService.createEntitiesIfNotExists(interaction.user.id, interaction.guildId);
-			await this.dbService.createResourceIfNotExists(video.videoDetails.videoId, RESOURCE_TYPES.YOUTUBE_VIDEO);
+			const [, dbGuild] = await this.dbService.createEntitiesIfNotExists(interaction.user.id, interaction.guildId);
 
-			await interaction.reply('works');
+			await this.queueService.addItemToQueue(
+				video.videoDetails.videoId,
+				dbGuild,
+				ENTITY_TYPES.GUILD,
+				RESOURCE_TYPES.YOUTUBE_VIDEO
+			);
+
+			await interaction.reply(`Added \`${video.videoDetails.title}\` to the server queue.`);
 		} catch (error) {
 			console.error(error);
 

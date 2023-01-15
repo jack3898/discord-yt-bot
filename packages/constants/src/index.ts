@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+export * as ENTITY_TYPES from './entityType';
 export * as ENV from './environment';
-export * as RESOURCE_TYPES from './resourceTypes';
+export * as RESOURCE_TYPES from './resourceType';
 
