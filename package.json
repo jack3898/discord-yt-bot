@@ -20,7 +20,8 @@
         "kube-apply": "kubectl apply -f .kubernetes -R",
         "db:generate": "turbo run build --filter=database",
         "db:push": "turbo run db-push",
-        "db:studio": "turbo run db-studio"
+        "db:studio": "turbo run db-studio",
+        "db:seed": "turbo run db-seed"
     },
     "repository": {
         "type": "git",

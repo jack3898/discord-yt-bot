@@ -1,6 +1,9 @@
+import { RESOURCE_TYPES } from '@yt-bot/constants';
 import { PrismaClient } from '@yt-bot/database';
 import { Guild, User } from 'discord.js';
 import { singleton } from 'tsyringe';
+
+type ResourceTypes = typeof RESOURCE_TYPES[keyof typeof RESOURCE_TYPES];
 
 /**
  * Service that extends the Prisma client.
@@ -8,19 +11,35 @@ import { singleton } from 'tsyringe';
  */
 @singleton()
 export class DatabaseService extends PrismaClient {
-	async createEntitiesIfNotExists(userId: User['id'], guildId: Guild['id']) {
-		const user = await this.discordUser.upsert({
-			where: { id: userId },
-			create: { id: userId },
+	/**
+	 * The queue system has a foreign key that relates to either a user or Discord server.
+	 * This is a quick way to add those users or servers to the db if they do not exist.
+	 */
+	createEntitiesIfNotExists(userId: User['id'], guildId: Guild['id']) {
+		return this.$transaction([
+			this.discordUser.upsert({
+				where: { id: userId },
+				create: { id: userId },
+				update: {}
+			}),
+			this.discordGuild.upsert({
+				where: { id: guildId },
+				create: { id: guildId },
+				update: {}
+			})
+		]);
+	}
+
+	createResourceIfNotExists(resource: string, type: ResourceTypes) {
+		return this.resource.upsert({
+			where: {
+				resource: resource
+			},
+			create: {
+				resource: resource,
+				resourceType: { connect: { name: type } }
+			},
 			update: {}
 		});
-
-		const guild = await this.discordGuild.upsert({
-			where: { id: guildId },
-			create: { id: guildId },
-			update: {}
-		});
-
-		return { user, guild };
 	}
 }

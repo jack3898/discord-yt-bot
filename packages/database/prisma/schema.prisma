@@ -36,11 +36,18 @@ model Queue {
   resourceId     Int
 }
 
+model ResourceType {
+  id       Int        @id() @default(autoincrement())
+  name     String     @unique
+  Resource Resource[]
+}
+
 model Resource {
-  id       Int      @id @default(autoincrement())
-  created  DateTime @default(now())
-  updated  DateTime @updatedAt()
-  type     String
-  resource String
-  Queue    Queue[]
+  id             Int          @id @default(autoincrement())
+  created        DateTime     @default(now())
+  updated        DateTime     @updatedAt()
+  resourceType   ResourceType @relation(fields: [resourceTypeId], references: [id])
+  resourceTypeId Int
+  resource       String       @unique()
+  Queue          Queue[]
 }

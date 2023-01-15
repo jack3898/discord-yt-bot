@@ -1,9 +1,9 @@
 import fs from 'fs';
 import path from 'path';
-import { ROOT } from '.';
+import { ENV } from '.';
 
 test('that ROOT points to the root of the monorepo', async () => {
-	const exists = fs.existsSync(path.resolve(ROOT, 'LICENSE'));
+	const exists = fs.existsSync(path.resolve(ENV.ROOT, 'LICENSE'));
 
 	expect(exists).toBeTruthy();
 });

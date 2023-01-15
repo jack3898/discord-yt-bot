@@ -1,5 +1,4 @@
-import path from 'path';
+/* eslint-disable prettier/prettier */
+export * as ENV from './environment';
+export * as RESOURCE_TYPES from './resourceTypes';
 
-export const ROOT = path.resolve(__dirname, '..', '..', '..');
-export const ROOT_NODE_MODULES = path.resolve(ROOT, 'node_modules');
-export const ROOT_ENV_FILE = path.resolve(ROOT, '.env');

@@ -1,0 +1,34 @@
+{
+    "name": "@yt-bot/seeder",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Seeder for the database.",
+    "main": "src/index.ts",
+    "scripts": {
+        "db-seed": "ts-node src/index.ts",
+        "lint": "eslint **/*.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jack3898/discord-yt-bot.git"
+    },
+    "author": "Jack Wright and contributors",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/jack3898/discord-yt-bot/issues"
+    },
+    "homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+    "engines": {
+        "node": "18.x"
+    },
+    "dependencies": {
+        "@yt-bot/constants": "*",
+        "@yt-bot/database": "*",
+        "ts-node": "^10.9.1"
+    },
+    "devDependencies": {
+        "@yt-bot/config-ts": "*",
+        "@yt-bot/eslint-config-yt-bot": "*"
+    },
+    "peerDependencies": {}
+}
