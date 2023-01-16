@@ -1,7 +1,6 @@
+import { ConstantsTypes } from '@yt-bot/constants';
 import { DiscordGuild, DiscordUser } from '@yt-bot/database';
 import { singleton } from 'tsyringe';
-import { EntityType } from '../types/EntityType';
-import { ResourceType } from '../types/ResourceTypes';
 import { DatabaseService } from './DatabaseService';
 
 @singleton()
@@ -19,7 +18,12 @@ export class QueueService {
 	 * (use the RESOURCE_TYPES constant).
 	 * @returns
 	 */
-	addItemToQueue(resourceData: string, entity: DiscordUser | DiscordGuild, scope: EntityType, resourceType: ResourceType) {
+	addItemToQueue(
+		resourceData: string,
+		entity: DiscordUser | DiscordGuild,
+		scope: ConstantsTypes.EntityType,
+		resourceType: ConstantsTypes.ResourceType
+	) {
 		return this.dbService.queue.create({
 			data: {
 				resource: {

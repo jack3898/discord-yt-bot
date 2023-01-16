@@ -1,7 +1,7 @@
+import { ConstantsTypes } from '@yt-bot/constants';
 import { PrismaClient } from '@yt-bot/database';
 import { Guild, User } from 'discord.js';
 import { singleton } from 'tsyringe';
-import { ResourceType } from '../types/ResourceTypes';
 
 /**
  * Service that extends the Prisma client.
@@ -28,7 +28,7 @@ export class DatabaseService extends PrismaClient {
 		]);
 	}
 
-	createResourceIfNotExists(resource: string, type: ResourceType) {
+	createResourceIfNotExists(resource: string, type: ConstantsTypes.ResourceType) {
 		return this.resource.upsert({
 			where: {
 				resource: resource
