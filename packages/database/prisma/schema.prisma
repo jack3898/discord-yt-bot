@@ -49,5 +49,6 @@ model Resource {
   resourceType   ResourceType @relation(fields: [resourceTypeId], references: [id])
   resourceTypeId Int
   resource       String       @unique()
+  expired        Boolean      @default(false)
   Queue          Queue[]
 }

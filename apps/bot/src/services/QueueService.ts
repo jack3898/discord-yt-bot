@@ -20,9 +20,9 @@ export class QueueService {
 	 */
 	addItemToQueue(
 		resourceData: string,
-		entity: DiscordUser | DiscordGuild,
 		scope: ConstantsTypes.EntityType,
-		resourceType: ConstantsTypes.ResourceType
+		resourceType: ConstantsTypes.ResourceType,
+		entity?: DiscordUser | DiscordGuild
 	) {
 		return this.dbService.queue.create({
 			data: {
@@ -41,9 +41,23 @@ export class QueueService {
 						}
 					}
 				},
-				discordGuild: scope === 'guild' ? { connect: { id: entity.id } } : undefined,
-				discordUser: scope === 'user' ? { connect: { id: entity.id } } : undefined
+				discordGuild: scope === 'guild' ? { connect: { id: entity?.id } } : undefined,
+				discordUser: scope === 'user' ? { connect: { id: entity?.id } } : undefined
 			}
 		});
+	}
+
+	async getItemsByCursor(cursor?: number, take = 1) {
+		const data = await this.dbService.queue.findMany({
+			cursor: { id: cursor },
+			take: take + 1
+		});
+
+		const nextCursor = data.pop()?.id || null;
+
+		return {
+			nextCursor,
+			data
+		};
 	}
 }
