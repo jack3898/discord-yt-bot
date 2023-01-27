@@ -1,19 +1,23 @@
 import { AudioPlayerStatus, createAudioPlayer, joinVoiceChannel } from '@discordjs/voice';
+import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
+import { LANG } from '../langpacks';
 import { BotService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
+
+const COMMAND = LANG.COMMANDS.PLAY;
 
 @injectable()
 export class Play implements ICommand {
 	constructor(public botService: BotService, public youtubeService: YouTubeService) {}
 
 	definition = new SlashCommandBuilder()
-		.setName('play')
-		.setDescription('Play an audio resource in a voice channel you are connected to.')
+		.setName(COMMAND.NAME)
+		.setDescription(COMMAND.DESC)
 		.addStringOption((option) =>
-			option.setName('resource').setDescription('A YouTube video URL or ID.').setRequired(true)
+			option.setName(COMMAND.OPTION.RESOURCE.NAME).setDescription(COMMAND.OPTION.RESOURCE.DESC).setRequired(true)
 		)
 		.setDMPermission(false);
 
@@ -24,7 +28,7 @@ export class Play implements ICommand {
 
 			if (!commandAuthorVoiceChannel?.id) {
 				return void interaction.reply({
-					content: 'You must be connected to a voice channel to use this command.',
+					content: COMMAND.ERROR.NO_VOICE_CONN,
 					ephemeral: true
 				});
 			}
@@ -33,7 +37,7 @@ export class Play implements ICommand {
 
 			if (!commandAuthorCanSpeak) {
 				return void interaction.reply({
-					content: 'You do not have voice permission for this voice channel.',
+					content: COMMAND.ERROR.NO_VOICE_PERM,
 					ephemeral: true
 				});
 			}
@@ -43,7 +47,7 @@ export class Play implements ICommand {
 
 			if (!url) {
 				return void interaction.reply({
-					content: 'The provided resource is invalid.',
+					content: COMMAND.ERROR.INVALID_RESOURCE,
 					ephemeral: true
 				});
 			}
@@ -75,14 +79,13 @@ export class Play implements ICommand {
 
 			audioPlayer.play(stream);
 
-			interaction.reply(`Now playing \`${info.videoDetails.title}\``);
+			interaction.reply(t(COMMAND.RESPONSE.SUCCESS, { title: info.videoDetails.title }));
 		} catch (error) {
 			console.error(error);
 
-			const message =
-				'There was an internal server problem. There is a chance this is because the video is private or age restricted.';
-
-			interaction.replied ? interaction.editReply(message) : interaction.reply(message);
+			interaction.replied
+				? interaction.editReply(COMMAND.ERROR.INTERNAL_ERROR)
+				: interaction.reply(COMMAND.ERROR.INTERNAL_ERROR);
 		}
 	}
 }

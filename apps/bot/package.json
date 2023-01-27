@@ -27,6 +27,7 @@
 		"@discordjs/voice": "^0.13.0",
 		"@yt-bot/database": "*",
 		"@yt-bot/env": "*",
+		"@yt-bot/i18n": "*",
 		"discord.js": "^14.6.0",
 		"reflect-metadata": "^0.1.13",
 		"socket.io-client": "^4.5.4",

@@ -1,17 +1,17 @@
 import { getVoiceConnection } from '@discordjs/voice';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
+import { LANG } from '../langpacks';
 import { BotService } from '../services';
 import { ICommand } from '../types/ICommand';
+
+const COMMAND = LANG.COMMANDS.STOP;
 
 @injectable()
 export class Stop implements ICommand {
 	constructor(public botService: BotService) {}
 
-	definition = new SlashCommandBuilder()
-		.setName('stop')
-		.setDescription('Stop the bot from playing.')
-		.setDMPermission(false);
+	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC).setDMPermission(false);
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
@@ -19,7 +19,7 @@ export class Stop implements ICommand {
 
 			if (!botVoiceConnection) {
 				return void interaction.reply({
-					content: 'I am not currently playing anything that could be stopped.',
+					content: COMMAND.ERROR.NOT_PLAYING,
 					ephemeral: true
 				});
 			}
@@ -30,7 +30,7 @@ export class Stop implements ICommand {
 
 			if (commandAuthorVoiceChannel?.id !== botVoiceChannelId) {
 				return void interaction.reply({
-					content: 'To avoid disruption with potential listeners, please connect to the same voice channel as me.',
+					content: COMMAND.ERROR.INVALID_CHANNEL,
 					ephemeral: true
 				});
 			}
@@ -39,20 +39,20 @@ export class Stop implements ICommand {
 
 			if (!commandAuthorCanSpeak) {
 				return void interaction.reply({
-					content: 'You do not have voice permission for this voice channel.',
+					content: COMMAND.ERROR.NO_VOICE_PERM,
 					ephemeral: true
 				});
 			}
 
 			botVoiceConnection.destroy();
 
-			interaction.reply('Bot has been disconnected.');
+			interaction.reply(COMMAND.RESPONSE.SUCCESS);
 		} catch (error) {
 			console.error(error);
 
-			const message = 'There was an internal server problem.';
-
-			interaction.replied ? interaction.editReply(message) : interaction.reply(message);
+			interaction.replied
+				? interaction.editReply(COMMAND.ERROR.INTERNAL_ERROR)
+				: interaction.reply(COMMAND.ERROR.INTERNAL_ERROR);
 		}
 	}
 }
