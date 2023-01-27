@@ -10,15 +10,15 @@ export class RestService extends REST {
 		this.setToken(DISCORD_TOKEN);
 	}
 
-	commandsRoute = GUILD_ID
-		? (() => {
-				console.log('🟨 Guild ID detected in environment. Slash commands will be registered in guild scope.');
+	get commandsRoute() {
+		if (GUILD_ID) {
+			console.log('🟨 Guild ID detected in environment. Slash commands will be registered in guild scope.');
 
-				return Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID);
-		  })()
-		: (() => {
-				console.log('🟨 Slash commands will be registered globally. This can take up to an hour to take effect!');
+			return Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID);
+		}
 
-				return Routes.applicationCommands(CLIENT_ID);
-		  })();
+		console.log('🟨 Slash commands will be registered globally. This can take up to an hour to take effect!');
+
+		return Routes.applicationCommands(CLIENT_ID);
+	}
 }
