@@ -51,9 +51,8 @@ export default {
 					NAME: 'target',
 					DESC: 'Where should the item go? By default it is in a temporary internal queue.',
 					CHOICES: {
-						SERVER: 'This server',
-						USER: 'Your profile',
-						DEFAULT: 'Internal (default)'
+						SERVER: 'This server (default)',
+						USER: 'Your profile'
 					}
 				}
 			},

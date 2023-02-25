@@ -38,10 +38,6 @@ export class Enqueue implements ICommand {
 					name: COMMAND.OPTION.TARGET.CHOICES.USER,
 					value: ENTITY_TYPES.USER
 				})
-				.addChoices({
-					name: COMMAND.OPTION.TARGET.CHOICES.DEFAULT,
-					value: ENTITY_TYPES.EPHEMERAL
-				})
 				.setRequired(false)
 		);
 
@@ -57,17 +53,14 @@ export class Enqueue implements ICommand {
 				});
 			}
 
-			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.EPHEMERAL;
+			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.GUILD;
+
 			const [dbUser, dbGuild] = await this.dbService.createEntitiesIfNotExists({
 				userId: interaction.user.id,
 				guildId: interaction.guildId
 			});
 
 			const entityTranslation = {
-				[ENTITY_TYPES.EPHEMERAL]: {
-					entity: undefined,
-					feedback: COMMAND.DESTINATIONS.DEFAULT
-				},
 				[ENTITY_TYPES.GUILD]: {
 					entity: dbGuild,
 					feedback: COMMAND.DESTINATIONS.SERVER
