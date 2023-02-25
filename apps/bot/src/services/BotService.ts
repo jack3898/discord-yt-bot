@@ -1,5 +1,7 @@
+import { generateFormatters } from '@yt-bot/i18n';
 import { Client, GatewayIntentBits, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { singleton } from 'tsyringe';
+import { LANG } from '../langpacks';
 import { CommandService } from './CommandService';
 import { RestService } from './RestService';
 import { ShardManagerService } from './ShardManagerService';
@@ -21,7 +23,11 @@ export class BotService extends Client {
 			shardCount: shardManagerService.shardCount,
 			shards: shardManagerService.shardId
 		});
+
+		this.formatters = generateFormatters(LANG.LOCALE);
 	}
+
+	formatters: ReturnType<typeof generateFormatters>;
 
 	/**
 	 * Registers required event listeners for various bot events.

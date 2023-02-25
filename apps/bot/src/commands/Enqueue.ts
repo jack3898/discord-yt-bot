@@ -58,10 +58,10 @@ export class Enqueue implements ICommand {
 			}
 
 			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.EPHEMERAL;
-			const [dbUser, dbGuild] = await this.dbService.createEntitiesIfNotExists(
-				interaction.user.id,
-				interaction.guildId
-			);
+			const [dbUser, dbGuild] = await this.dbService.createEntitiesIfNotExists({
+				userId: interaction.user.id,
+				guildId: interaction.guildId
+			});
 
 			const entityTranslation = {
 				[ENTITY_TYPES.EPHEMERAL]: {

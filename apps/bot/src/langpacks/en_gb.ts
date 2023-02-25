@@ -3,6 +3,7 @@
  * Please see the README next to this for more information.
  */
 export default {
+	LOCALE: 'en-GB', // Defines number and date time formats using [ISO-639-1]-[ISO_3166-1]
 	COMMANDS: {
 		PLAY: {
 			NAME: 'play',
@@ -72,6 +73,18 @@ export default {
 		ABOUT: {
 			NAME: 'about',
 			DESC: 'Get some debug information about the bot.'
+		},
+		MYQUEUE: {
+			NAME: 'myqueue',
+			DESC: 'Display your queue.',
+			RESPONSE: {
+				SUCCESS_EMBED: {
+					TITLE: 'Your queue',
+					ITEM_TITLE: '{{index}}) {{videotitle}}',
+					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{videourl}}) ',
+					FOOTER: 'Displaying up to the next {{defaultcount}} items. {{count}} item(s) are in the queue.'
+				}
+			}
 		}
 	},
 	SERVICES: {}

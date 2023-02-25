@@ -13,19 +13,30 @@ export class DatabaseService extends PrismaClient {
 	 * The queue system has a foreign key that relates to either a user or Discord server.
 	 * This is a quick way to add those users or servers to the db if they do not exist.
 	 */
-	createEntitiesIfNotExists(userId: User['id'], guildId: Guild['id']) {
-		return this.$transaction([
-			this.discordUser.upsert({
-				where: { id: userId },
-				create: { id: userId },
-				update: {}
-			}),
-			this.discordGuild.upsert({
-				where: { id: guildId },
-				create: { id: guildId },
-				update: {}
-			})
-		]);
+	createEntitiesIfNotExists({ userId, guildId }: { userId?: User['id']; guildId?: Guild['id'] }) {
+		const transactionItems = [];
+
+		if (userId) {
+			transactionItems.push(
+				this.discordUser.upsert({
+					where: { id: userId },
+					create: { id: userId },
+					update: {}
+				})
+			);
+		}
+
+		if (guildId) {
+			transactionItems.push(
+				this.discordGuild.upsert({
+					where: { id: guildId },
+					create: { id: guildId },
+					update: {}
+				})
+			);
+		}
+
+		return this.$transaction(transactionItems);
 	}
 
 	createResourceIfNotExists(resource: string, type: ConstantsTypes.ResourceType) {
