@@ -80,7 +80,23 @@ export default {
 				SUCCESS_EMBED: {
 					TITLE: 'Your queue',
 					ITEM_TITLE: '{{index}}) {{videotitle}}',
+					ITEM_TITLE_EMPTY: 'Empty :(',
 					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{videourl}}) ',
+					ITEM_DETAILS_EMPTY: 'The queue is empty!',
+					FOOTER: 'Displaying up to the next {{defaultcount}} items. {{count}} item(s) are in the queue.'
+				}
+			}
+		},
+		QUEUE: {
+			NAME: 'queue',
+			DESC: "Display the server's queue.",
+			RESPONSE: {
+				SUCCESS_EMBED: {
+					TITLE: 'Server queue',
+					ITEM_TITLE: '{{index}}) {{videotitle}}',
+					ITEM_TITLE_EMPTY: 'Empty :(',
+					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{videourl}}) ',
+					ITEM_DETAILS_EMPTY: 'The queue is empty!',
 					FOOTER: 'Displaying up to the next {{defaultcount}} items. {{count}} item(s) are in the queue.'
 				}
 			}

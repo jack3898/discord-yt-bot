@@ -6,10 +6,10 @@ import { BotService, DatabaseService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
-const COMMAND = LANG.COMMANDS.MYQUEUE;
+const COMMAND = LANG.COMMANDS.QUEUE;
 
 @injectable()
-export class Myqueue implements ICommand {
+export class Queue implements ICommand {
 	constructor(
 		private botService: BotService,
 		private dbService: DatabaseService,
@@ -19,20 +19,20 @@ export class Myqueue implements ICommand {
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC);
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
-		const userId = interaction.user.id;
+		const guildId = interaction.guildId;
 
-		await this.dbService.createEntitiesIfNotExists({ userId });
+		await this.dbService.createEntitiesIfNotExists({ guildId });
 
 		const queueLen = 10;
 
 		const queue = await this.dbService.queue.findMany({
-			where: { discordUserId: userId },
+			where: { discordGuildId: guildId },
 			select: { resource: { select: { resource: true } } },
 			take: queueLen
 		});
 
 		const count = await this.dbService.queue.count({
-			where: { discordUserId: userId }
+			where: { discordGuildId: guildId }
 		});
 
 		const resourcePromises = queue.map(async (queueItem) => {
