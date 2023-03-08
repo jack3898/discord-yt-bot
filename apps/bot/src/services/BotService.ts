@@ -1,3 +1,4 @@
+import { AudioPlayer, AudioPlayerStatus } from '@discordjs/voice';
 import { generateFormatters } from '@yt-bot/i18n';
 import { Client, GatewayIntentBits, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { singleton } from 'tsyringe';
@@ -72,5 +73,18 @@ export class BotService extends Client {
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			throw new Error(error as any);
 		}
+	}
+
+	// Do not worry! Does not cause a memory leak
+	// Unless the console.log is ran two or more times for a single connection 🤔
+	onVoiceIdle(audioPlayer: AudioPlayer, callback: () => void) {
+		audioPlayer.on('stateChange', (oldState, newState) => {
+			const wasPlaying = oldState.status === AudioPlayerStatus.Playing;
+			const isIdle = newState.status === AudioPlayerStatus.Idle;
+
+			if (wasPlaying && isIdle) {
+				callback();
+			}
+		});
 	}
 }
