@@ -71,7 +71,17 @@ export default {
 		},
 		ABOUT: {
 			NAME: 'about',
-			DESC: 'Get some debug information about the bot.'
+			DESC: 'Get some debug information about the bot.',
+			RESPONSE: {
+				SUCCESS_EMBED: {
+					TITLE: 'About this bot',
+					DESCRIPTION: [
+						'Free and open source music bot by Jack Wright. It is free and open source!',
+						'[View source code on GitHub](https://github.com/jack3898/discord-yt-bot)',
+						'Version: {{version}}'
+					].join('\n\n')
+				}
+			}
 		},
 		MYQUEUE: {
 			NAME: 'myqueue',
