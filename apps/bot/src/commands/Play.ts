@@ -3,7 +3,7 @@ import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService } from '../services';
+import { BotService, DatabaseService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -11,7 +11,11 @@ const COMMAND = LANG.COMMANDS.PLAY;
 
 @injectable()
 export class Play implements ICommand {
-	constructor(public botService: BotService, public youtubeService: YouTubeService) {}
+	constructor(
+		public botService: BotService,
+		public youtubeService: YouTubeService,
+		public databaseService: DatabaseService
+	) {}
 
 	definition = new SlashCommandBuilder()
 		.setName(COMMAND.NAME)
