@@ -28,12 +28,15 @@ model Queue {
   id             Int           @id() @default(autoincrement())
   created        DateTime      @default(now())
   updated        DateTime      @updatedAt()
-  discordUser    DiscordUser?  @relation(fields: [discordUserId], references: [id])
-  discordUserId  String?
+  discordUser    DiscordUser   @relation(fields: [discordUserId], references: [id])
+  discordUserId  String
   discordGuild   DiscordGuild? @relation(fields: [discordGuildId], references: [id])
   discordGuildId String?
   resource       Resource      @relation(fields: [resourceId], references: [id])
+  expired        Boolean       @default(false)
   resourceId     Int
+
+  @@index([discordUserId, discordGuildId])
 }
 
 model ResourceType {
@@ -49,6 +52,5 @@ model Resource {
   resourceType   ResourceType @relation(fields: [resourceTypeId], references: [id])
   resourceTypeId Int
   resource       String       @unique()
-  expired        Boolean      @default(false)
   Queue          Queue[]
 }

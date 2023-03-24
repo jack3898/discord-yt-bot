@@ -1,4 +1,4 @@
-import { ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
+import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
@@ -60,28 +60,16 @@ export class Enqueue implements ICommand {
 				guildId: interaction.guildId
 			});
 
-			const entityTranslation = {
-				[ENTITY_TYPES.GUILD]: {
-					entity: dbGuild,
-					feedback: COMMAND.DESTINATIONS.SERVER
-				},
-				[ENTITY_TYPES.USER]: {
-					entity: dbUser,
-					feedback: COMMAND.DESTINATIONS.USER
-				}
-			}[entityType];
-
 			await this.queueService.addItemToQueue(
 				video.videoDetails.videoId,
-				entityType as ConstantsTypes.EntityType,
 				RESOURCE_TYPES.YOUTUBE_VIDEO,
-				entityTranslation?.entity
+				dbUser,
+				entityType === ENTITY_TYPES.GUILD ? dbGuild : undefined
 			);
 
 			await interaction.reply(
 				t(COMMAND.RESPONSE.SUCCESS, {
-					title: video.videoDetails.title,
-					destination: entityTranslation?.feedback
+					title: video.videoDetails.title
 				})
 			);
 		} catch (error) {

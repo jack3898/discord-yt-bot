@@ -11,7 +11,16 @@ export default {
 			OPTION: {
 				RESOURCE: {
 					NAME: 'resource',
-					DESC: 'A YouTube video URL or ID.'
+					DESC: 'A YouTube video URL or ID. Ignored if the previous option is not set to "search".'
+				},
+				TYPE: {
+					NAME: 'type',
+					DESC: 'What would you like to play?',
+					OPTIONS: {
+						SERVER_QUEUE: 'Server queue',
+						YOUR_QUEUE: 'Your queue',
+						SEARCH: 'Search'
+					}
 				}
 			},
 			ERROR: {
@@ -57,12 +66,7 @@ export default {
 				}
 			},
 			RESPONSE: {
-				SUCCESS: 'Added `{{title}}` to {{destination}} queue.'
-			},
-			DESTINATIONS: {
-				SERVER: "this server's",
-				USER: 'your',
-				DEFAULT: 'a temporary'
+				SUCCESS: 'Added `{{title}}` to the queue.'
 			},
 			ERROR: {
 				INTERNAL_ERROR: 'There was an internal server problem.',

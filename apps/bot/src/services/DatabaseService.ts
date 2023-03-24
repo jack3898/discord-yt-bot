@@ -23,45 +23,35 @@ export class DatabaseService extends PrismaClient {
 	 * This is a quick way to add those users or servers to the db if they do not exist.
 	 */
 	createEntitiesIfNotExists(entities: {
-		userId?: User['id'];
-		guildId?: Guild['id'];
+		userId: User['id'];
+		guildId: Guild['id'];
 	}): Promise<(DiscordUser | DiscordGuild)[]> {
-		const queries = Object.entries(entities).map(async ([entityType, id]): Promise<DiscordGuild | DiscordUser> => {
-			switch (entityType) {
-				case 'userId':
-					return (
-						this.userIdCache.get(id) ||
-						this.discordUser
-							.upsert({
-								where: { id },
-								create: { id },
-								update: {}
-							})
-							.then((res) => {
-								this.userIdCache.set(id, res);
+		const queries = [
+			this.userIdCache.get(entities.userId) ||
+				this.discordUser
+					.upsert({
+						where: { id: entities.userId },
+						create: { id: entities.userId },
+						update: {}
+					})
+					.then((res) => {
+						this.userIdCache.set(entities.userId, res);
 
-								return res;
-							})
-					);
-				case 'guildId':
-					return (
-						this.guildIdCache.get(id) ||
-						this.discordGuild
-							.upsert({
-								where: { id },
-								create: { id },
-								update: {}
-							})
-							.then((res) => {
-								this.guildIdCache.set(id, res);
+						return res;
+					}),
+			this.guildIdCache.get(entities.guildId) ||
+				this.discordGuild
+					.upsert({
+						where: { id: entities.guildId },
+						create: { id: entities.guildId },
+						update: {}
+					})
+					.then((res) => {
+						this.guildIdCache.set(entities.guildId, res);
 
-								return res;
-							})
-					);
-			}
-
-			throw TypeError('Incorrect entity name provided. It must be guildId or userId.');
-		});
+						return res;
+					})
+		];
 
 		return Promise.all(queries);
 	}
@@ -87,7 +77,7 @@ export class DatabaseService extends PrismaClient {
 
 			const after = Date.now();
 
-			console.log(`${params.action.toUpperCase()} ${params.model} (${after - before}ms)`);
+			console.log(`🟨 ${params.action.toUpperCase()} ${params.model} (${after - before}ms)`);
 
 			return result;
 		});

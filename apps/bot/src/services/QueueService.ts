@@ -20,9 +20,9 @@ export class QueueService {
 	 */
 	addItemToQueue(
 		resourceData: string,
-		scope: ConstantsTypes.EntityType,
 		resourceType: ConstantsTypes.ResourceType,
-		entity?: DiscordUser | DiscordGuild
+		discordUser: DiscordUser,
+		discordGuild?: DiscordGuild
 	) {
 		return this.dbService.queue.create({
 			data: {
@@ -41,8 +41,8 @@ export class QueueService {
 						}
 					}
 				},
-				discordGuild: scope === 'guild' ? { connect: { id: entity?.id } } : undefined,
-				discordUser: scope === 'user' ? { connect: { id: entity?.id } } : undefined
+				discordGuild: discordGuild ? { connect: { id: discordGuild.id } } : undefined,
+				discordUser: { connect: { id: discordUser.id } }
 			}
 		});
 	}

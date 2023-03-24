@@ -21,7 +21,7 @@ export class Myqueue implements ICommand {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		const userId = interaction.user.id;
 
-		await this.dbService.createEntitiesIfNotExists({ userId });
+		await this.dbService.createEntitiesIfNotExists({ userId, guildId: interaction.guildId });
 
 		const queueLen = 10;
 

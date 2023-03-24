@@ -1,9 +1,9 @@
-import { createAudioPlayer, joinVoiceChannel } from '@discordjs/voice';
+import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, DatabaseService } from '../services';
+import { DatabaseService, VoiceService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -12,7 +12,7 @@ const COMMAND = LANG.COMMANDS.PLAY;
 @injectable()
 export class Play implements ICommand {
 	constructor(
-		public botService: BotService,
+		public voiceService: VoiceService,
 		public youtubeService: YouTubeService,
 		public databaseService: DatabaseService
 	) {}
@@ -21,7 +21,16 @@ export class Play implements ICommand {
 		.setName(COMMAND.NAME)
 		.setDescription(COMMAND.DESC)
 		.addStringOption((option) =>
-			option.setName(COMMAND.OPTION.RESOURCE.NAME).setDescription(COMMAND.OPTION.RESOURCE.DESC).setRequired(true)
+			option
+				.setName(COMMAND.OPTION.TYPE.NAME)
+				.setDescription(COMMAND.OPTION.TYPE.DESC)
+				.addChoices({ name: COMMAND.OPTION.TYPE.OPTIONS.SEARCH, value: 'search' })
+				.addChoices({ name: COMMAND.OPTION.TYPE.OPTIONS.SERVER_QUEUE, value: ENTITY_TYPES.GUILD })
+				.addChoices({ name: COMMAND.OPTION.TYPE.OPTIONS.YOUR_QUEUE, value: ENTITY_TYPES.USER })
+				.setRequired(true)
+		)
+		.addStringOption((option) =>
+			option.setName(COMMAND.OPTION.RESOURCE.NAME).setDescription(COMMAND.OPTION.RESOURCE.DESC)
 		)
 		.setDMPermission(false);
 
@@ -46,37 +55,71 @@ export class Play implements ICommand {
 				});
 			}
 
-			const resource = interaction.options.getString('resource', true);
-			const [url] = this.youtubeService.getVideoUrls(resource);
+			const type = interaction.options.getString(COMMAND.OPTION.TYPE.NAME, true);
 
-			if (!url) {
-				return void interaction.reply({
-					content: COMMAND.ERROR.INVALID_RESOURCE,
-					ephemeral: true
-				});
+			switch (type) {
+				case 'search': {
+					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME);
+
+					if (!resource) {
+						return void interaction.reply({
+							content: COMMAND.ERROR.INTERNAL_ERROR,
+							ephemeral: true
+						});
+					}
+
+					const [url] = this.youtubeService.getVideoUrls(resource);
+
+					if (!url) {
+						return void interaction.reply({
+							content: COMMAND.ERROR.INVALID_RESOURCE,
+							ephemeral: true
+						});
+					}
+
+					const { audioPlayer, voiceConnection } = this.voiceService.joinVoice(
+						commandAuthor.guild,
+						commandAuthorVoiceChannel
+					);
+
+					const stream = await this.youtubeService.createAudioResourceFromUrl(url);
+					const [info] = await this.youtubeService.getVideoInfos(url);
+
+					this.voiceService.onVoiceIdle(audioPlayer, () => {
+						voiceConnection.destroy();
+
+						console.log(`🟨 Voice connection destroyed for guild ${interaction.guild.name}.`);
+					});
+
+					audioPlayer.play(stream);
+
+					interaction.reply(t(COMMAND.RESPONSE.SUCCESS, { title: info.videoDetails.title }));
+
+					break;
+				}
+				case ENTITY_TYPES.GUILD: {
+					const resource = await this.databaseService.queue.findFirst({
+						where: {
+							discordGuildId: commandAuthor.guild.id,
+							resource: {
+								resourceType: {
+									name: RESOURCE_TYPES.YOUTUBE_VIDEO
+								}
+							},
+							expired: false
+						}
+					});
+
+					await interaction.reply({
+						content: JSON.stringify(resource)
+					});
+
+					break;
+				}
+				case ENTITY_TYPES.USER: {
+					break;
+				}
 			}
-
-			const botVoiceConnection = joinVoiceChannel({
-				guildId: interaction.guildId,
-				channelId: commandAuthorVoiceChannel.id,
-				adapterCreator: commandAuthorVoiceChannel.guild.voiceAdapterCreator
-			});
-
-			const stream = await this.youtubeService.createAudioResourceFromUrl(url);
-			const [info] = await this.youtubeService.getVideoInfos(url);
-			const audioPlayer = createAudioPlayer();
-
-			botVoiceConnection.subscribe(audioPlayer);
-
-			this.botService.onVoiceIdle(audioPlayer, () => {
-				botVoiceConnection.destroy();
-
-				console.log(`🟨 Voice connection destroyed for guild ${interaction.guild.name}.`);
-			});
-
-			audioPlayer.play(stream);
-
-			interaction.reply(t(COMMAND.RESPONSE.SUCCESS, { title: info.videoDetails.title }));
 		} catch (error) {
 			console.error(error);
 
