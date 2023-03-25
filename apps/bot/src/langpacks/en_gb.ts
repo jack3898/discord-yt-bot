@@ -28,10 +28,11 @@ export default {
 				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.',
 				INVALID_RESOURCE: 'The provided resource is invalid.',
 				INTERNAL_ERROR:
-					'There was an internal server problem. There is a chance this is because the video is private or age restricted.'
+					'There was an internal server problem. There is a chance this is because the video is private or age restricted.',
+				NO_ITEM: 'The queue is empty!'
 			},
 			RESPONSE: {
-				SUCCESS: 'Now playing `{{title}}`.'
+				SUCCESS: 'Now playing the audio.'
 			}
 		},
 		STOP: {

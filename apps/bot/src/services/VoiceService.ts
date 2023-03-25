@@ -1,4 +1,11 @@
-import { AudioPlayer, AudioPlayerStatus, createAudioPlayer, joinVoiceChannel, VoiceConnection } from '@discordjs/voice';
+import {
+	AudioPlayer,
+	AudioPlayerStatus,
+	AudioResource,
+	createAudioPlayer,
+	joinVoiceChannel,
+	VoiceConnection
+} from '@discordjs/voice';
 import { Guild, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 
@@ -46,5 +53,37 @@ export class VoiceService {
 		voiceConnection.subscribe(audioPlayer);
 
 		return { audioPlayer, voiceConnection };
+	}
+
+	/**
+	 * This function will join the voice channel and handles the new voice session.
+	 *
+	 * The return value of resolveAudioResource() tells the bot what to play both at the start of the voice connection and when the voice goes idle
+	 * (basically, when the audio ends).
+	 */
+	async startVoiceSession({
+		guild,
+		voiceBasedChannel,
+		resolveAudioResource
+	}: {
+		guild: Guild;
+		voiceBasedChannel: VoiceBasedChannel;
+		resolveAudioResource: () => Promise<AudioResource | 'DISCONNECT'>;
+	}) {
+		const { audioPlayer, voiceConnection } = this.joinVoice(guild, voiceBasedChannel);
+
+		async function playNextQueueItem() {
+			const nextResource = await resolveAudioResource();
+
+			if (nextResource === 'DISCONNECT' || !nextResource) {
+				return void voiceConnection.destroy();
+			}
+
+			audioPlayer.play(nextResource);
+		}
+
+		playNextQueueItem();
+
+		this.onVoiceIdle(audioPlayer, playNextQueueItem);
 	}
 }
