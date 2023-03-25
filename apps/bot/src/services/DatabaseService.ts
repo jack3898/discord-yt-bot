@@ -1,6 +1,5 @@
 import { ConstantsTypes } from '@yt-bot/constants';
 import { DiscordGuild, DiscordUser, PrismaClient } from '@yt-bot/database';
-import { Guild, User } from 'discord.js';
 import { singleton } from 'tsyringe';
 
 /**
@@ -17,44 +16,6 @@ export class DatabaseService extends PrismaClient {
 
 	private userIdCache = new Map<string, DiscordUser>();
 	private guildIdCache = new Map<string, DiscordGuild>();
-
-	/**
-	 * The queue system has a foreign key that relates to either a user or Discord server.
-	 * This is a quick way to add those users or servers to the db if they do not exist.
-	 */
-	createEntitiesIfNotExists(entities: {
-		userId: User['id'];
-		guildId: Guild['id'];
-	}): Promise<(DiscordUser | DiscordGuild)[]> {
-		const queries = [
-			this.userIdCache.get(entities.userId) ||
-				this.discordUser
-					.upsert({
-						where: { id: entities.userId },
-						create: { id: entities.userId },
-						update: {}
-					})
-					.then((res) => {
-						this.userIdCache.set(entities.userId, res);
-
-						return res;
-					}),
-			this.guildIdCache.get(entities.guildId) ||
-				this.discordGuild
-					.upsert({
-						where: { id: entities.guildId },
-						create: { id: entities.guildId },
-						update: {}
-					})
-					.then((res) => {
-						this.guildIdCache.set(entities.guildId, res);
-
-						return res;
-					})
-		];
-
-		return Promise.all(queries);
-	}
 
 	createResourceIfNotExists(resource: string, type: ConstantsTypes.ResourceType) {
 		return this.resource.upsert({

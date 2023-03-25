@@ -55,16 +55,11 @@ export class Enqueue implements ICommand {
 
 			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.GUILD;
 
-			const [dbUser, dbGuild] = await this.dbService.createEntitiesIfNotExists({
-				userId: interaction.user.id,
-				guildId: interaction.guildId
-			});
-
 			await this.queueService.addItemToQueue(
 				video.videoDetails.videoId,
 				RESOURCE_TYPES.YOUTUBE_VIDEO,
-				dbUser,
-				entityType === ENTITY_TYPES.GUILD ? dbGuild : undefined
+				interaction.member.id,
+				entityType === ENTITY_TYPES.GUILD ? interaction.guild.id : undefined
 			);
 
 			await interaction.reply(

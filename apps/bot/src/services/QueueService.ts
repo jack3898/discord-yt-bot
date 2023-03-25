@@ -1,11 +1,12 @@
 import { ConstantsTypes } from '@yt-bot/constants';
-import { DiscordGuild, DiscordUser } from '@yt-bot/database';
 import { singleton } from 'tsyringe';
 import { DatabaseService } from './DatabaseService';
 
 @singleton()
 export class QueueService {
 	constructor(private dbService: DatabaseService) {}
+
+	readonly recommendedPageSize = 10;
 
 	/**
 	 * Inserts an item to the queue. As queues can have multiple scopes (i.e., who owns the queue; user or server?)
@@ -18,11 +19,11 @@ export class QueueService {
 	 * (use the RESOURCE_TYPES constant).
 	 * @returns
 	 */
-	addItemToQueue(
+	async addItemToQueue(
 		resourceData: string,
 		resourceType: ConstantsTypes.ResourceType,
-		discordUser: DiscordUser,
-		discordGuild?: DiscordGuild
+		discordUserId: string,
+		discordGuildId?: string
 	) {
 		return this.dbService.queue.create({
 			data: {
@@ -34,15 +35,25 @@ export class QueueService {
 						create: {
 							resource: resourceData,
 							resourceType: {
-								connect: {
-									name: resourceType
-								}
+								connect: { name: resourceType }
 							}
 						}
 					}
 				},
-				discordGuild: discordGuild ? { connect: { id: discordGuild.id } } : undefined,
-				discordUser: { connect: { id: discordUser.id } }
+				discordUser: {
+					connectOrCreate: {
+						where: { id: discordUserId },
+						create: { id: discordUserId }
+					}
+				},
+				discordGuild: discordGuildId
+					? {
+							connectOrCreate: {
+								where: { id: discordGuildId },
+								create: { id: discordGuildId }
+							}
+					  }
+					: undefined
 			}
 		});
 	}
@@ -59,5 +70,14 @@ export class QueueService {
 			nextCursor,
 			data
 		};
+	}
+
+	getQueue(userId: string, guildId?: string) {
+		return this.dbService.queue.findMany({
+			// User queues must not have a guild id, but guild queues must have a user id.
+			where: { discordUserId: userId, discordGuildId: guildId ?? null },
+			select: { resource: { select: { resource: true } } },
+			take: this.recommendedPageSize
+		});
 	}
 }
