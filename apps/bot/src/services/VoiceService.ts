@@ -6,6 +6,7 @@ import {
 	joinVoiceChannel,
 	VoiceConnection
 } from '@discordjs/voice';
+import { ConstantsTypes } from '@yt-bot/constants';
 import { Guild, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 
@@ -68,7 +69,7 @@ export class VoiceService {
 	}: {
 		guild: Guild;
 		voiceBasedChannel: VoiceBasedChannel;
-		resolveAudioResource: () => Promise<AudioResource | 'DISCONNECT'>;
+		resolveAudioResource: () => Promise<AudioResource | ConstantsTypes.VoiceConnectionSignals>;
 	}) {
 		const { audioPlayer, voiceConnection } = this.joinVoice(guild, voiceBasedChannel);
 

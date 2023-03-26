@@ -1,5 +1,5 @@
 import { AudioPlayer, AudioResource, VoiceConnection } from '@discordjs/voice';
-import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
+import { ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { ChatInputCommandInteraction, Guild, SlashCommandBuilder, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
@@ -67,13 +67,13 @@ export class Play implements ICommand {
 						voiceBasedChannel: commandAuthorVoiceChannel,
 						resolveAudioResource: async () => {
 							if (!resource) {
-								return 'DISCONNECT';
+								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
 							}
 
 							const [url] = this.youtubeService.getVideoUrls(resource);
 
 							if (!url) {
-								return 'DISCONNECT';
+								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
 							}
 
 							return this.youtubeService.createAudioResourceFromUrl(url);
@@ -92,13 +92,13 @@ export class Play implements ICommand {
 							const nextItem = await this.queueService.getNextQueueItem(interaction.guildId);
 
 							if (!nextItem) {
-								return 'DISCONNECT';
+								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
 							}
 
 							const [url] = this.youtubeService.getVideoUrls(nextItem.resource.resource);
 
 							if (!url) {
-								return 'DISCONNECT';
+								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
 							}
 
 							await this.queueService.setExpired(nextItem.id);
