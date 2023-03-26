@@ -3,7 +3,7 @@ import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, DatabaseService, QueueService, ShardManagerService } from '../services';
+import { QueueService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -11,13 +11,7 @@ const COMMAND = LANG.COMMANDS.ENQUEUE;
 
 @injectable()
 export class Enqueue implements ICommand {
-	constructor(
-		public botService: BotService,
-		public shardManagerService: ShardManagerService,
-		public dbService: DatabaseService,
-		public youtubeService: YouTubeService,
-		public queueService: QueueService
-	) {}
+	constructor(private youtubeService: YouTubeService, private queueService: QueueService) {}
 
 	definition = new SlashCommandBuilder()
 		.setName(COMMAND.NAME)

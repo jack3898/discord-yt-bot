@@ -2,15 +2,12 @@ import { getVoiceConnection } from '@discordjs/voice';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService } from '../services';
 import { ICommand } from '../types/ICommand';
 
 const COMMAND = LANG.COMMANDS.STOP;
 
 @injectable()
 export class Stop implements ICommand {
-	constructor(public botService: BotService) {}
-
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC).setDMPermission(false);
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {

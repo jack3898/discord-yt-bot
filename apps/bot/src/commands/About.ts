@@ -4,15 +4,12 @@ import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from '
 import path from 'path';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, ShardManagerService } from '../services';
 import { ICommand } from '../types/ICommand';
 
 const COMMAND = LANG.COMMANDS.ABOUT;
 
 @injectable()
 export class About implements ICommand {
-	constructor(public botService: BotService, public shardManagerService: ShardManagerService) {}
-
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC);
 
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {

@@ -1,4 +1,4 @@
-import { ConstantsTypes, RESOURCE_TYPES } from '@yt-bot/constants';
+import { ConstantsTypes } from '@yt-bot/constants';
 import { singleton } from 'tsyringe';
 import { DatabaseService } from './DatabaseService';
 
@@ -75,21 +75,18 @@ export class QueueService {
 	getQueue(userId: string, guildId?: string, expired?: boolean) {
 		return this.dbService.queue.findMany({
 			// User queues must not have a guild id, but guild queues must have a user id.
-			where: { discordUserId: userId, discordGuildId: guildId ?? null, expired },
+			where: { discordUserId: userId, discordGuildId: guildId ?? null, expired: !!expired },
 			select: { resource: { select: { resource: true } } },
 			take: this.recommendedPageSize
 		});
 	}
 
-	getNextQueueItem(guildId: string) {
+	getNextQueueItem(resourceType: ConstantsTypes.ResourceType, guildId: string, userId?: string) {
 		return this.dbService.queue.findFirst({
 			where: {
-				discordGuildId: guildId,
-				resource: {
-					resourceType: {
-						name: RESOURCE_TYPES.YOUTUBE_VIDEO
-					}
-				},
+				discordGuildId: userId ? null : guildId,
+				discordUserId: userId,
+				resource: { resourceType: { name: resourceType } },
 				expired: false
 			},
 			include: {

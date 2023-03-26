@@ -1,9 +1,8 @@
-import { AudioPlayer, AudioResource, VoiceConnection } from '@discordjs/voice';
 import { ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
-import { ChatInputCommandInteraction, Guild, SlashCommandBuilder, VoiceBasedChannel } from 'discord.js';
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { DatabaseService, QueueService, VoiceService } from '../services';
+import { QueueService, VoiceService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -14,8 +13,7 @@ export class Play implements ICommand {
 	constructor(
 		private voiceService: VoiceService,
 		private youtubeService: YouTubeService,
-		private queueService: QueueService,
-		private databaseService: DatabaseService
+		private queueService: QueueService
 	) {}
 
 	definition = new SlashCommandBuilder()
@@ -58,63 +56,27 @@ export class Play implements ICommand {
 
 			const type = interaction.options.getString(COMMAND.OPTION.TYPE.NAME, true);
 
-			switch (type) {
-				case 'search': {
-					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME);
+			await this.voiceService.startVoiceSession({
+				guild: interaction.guild,
+				voiceBasedChannel: commandAuthorVoiceChannel,
+				resolveAudioResource: async () => {
+					const resource = await this.getResource(interaction, type);
 
-					this.voiceService.startVoiceSession({
-						guild: interaction.guild,
-						voiceBasedChannel: commandAuthorVoiceChannel,
-						resolveAudioResource: async () => {
-							if (!resource) {
-								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-							}
+					if (!resource) {
+						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
+					}
 
-							const [url] = this.youtubeService.getVideoUrls(resource);
+					const [url] = this.youtubeService.getVideoUrls(resource);
 
-							if (!url) {
-								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-							}
+					if (!url) {
+						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
+					}
 
-							return this.youtubeService.createAudioResourceFromUrl(url);
-						}
-					});
-
-					await interaction.reply(COMMAND.RESPONSE.SUCCESS);
-
-					break;
+					return this.youtubeService.createAudioResourceFromUrl(url);
 				}
-				case ENTITY_TYPES.GUILD: {
-					this.voiceService.startVoiceSession({
-						guild: interaction.guild,
-						voiceBasedChannel: commandAuthorVoiceChannel,
-						resolveAudioResource: async () => {
-							const nextItem = await this.queueService.getNextQueueItem(interaction.guildId);
+			});
 
-							if (!nextItem) {
-								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-							}
-
-							const [url] = this.youtubeService.getVideoUrls(nextItem.resource.resource);
-
-							if (!url) {
-								return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-							}
-
-							await this.queueService.setExpired(nextItem.id);
-
-							return this.youtubeService.createAudioResourceFromUrl(url);
-						}
-					});
-
-					break;
-				}
-				case ENTITY_TYPES.USER: {
-					break;
-				}
-			}
-
-			await interaction.reply(COMMAND.RESPONSE.SUCCESS);
+			!interaction.replied && (await interaction.reply(COMMAND.RESPONSE.SUCCESS));
 		} catch (error) {
 			console.error(error);
 
@@ -124,43 +86,45 @@ export class Play implements ICommand {
 		}
 	}
 
-	getNextQueueItem(guildId: string) {
-		return this.databaseService.queue.findFirst({
-			where: {
-				discordGuildId: guildId,
-				resource: {
-					resourceType: {
-						name: RESOURCE_TYPES.YOUTUBE_VIDEO
-					}
-				},
-				expired: false
-			},
-			include: {
-				resource: true
+	/**
+	 * Get the resource by a type flag.
+	 *
+	 * If the type is search, then it will get the resource name provided by the user's slash command input.
+	 * Else, it will query the database to find the next item in the queue.
+	 */
+	async getResource(interaction: ChatInputCommandInteraction<'cached'>, type: string): Promise<string | null> {
+		switch (type) {
+			case 'search': {
+				return interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME) || null;
 			}
-		});
-	}
+			case ENTITY_TYPES.GUILD: {
+				const nextItem = await this.queueService.getNextQueueItem(
+					RESOURCE_TYPES.YOUTUBE_VIDEO,
+					interaction.guild.id
+				);
 
-	async joinAndPlayFromUrl({
-		url,
-		guild,
-		voiceChannel,
-		onVoiceIdle
-	}: {
-		url: string;
-		guild: Guild;
-		voiceChannel: VoiceBasedChannel;
-		onVoiceIdle?: (audioPlayer: AudioPlayer, voiceConnection: VoiceConnection, audioResource: AudioResource) => void;
-	}) {
-		const { audioPlayer, voiceConnection } = this.voiceService.joinVoice(guild, voiceChannel);
+				if (nextItem) {
+					await this.queueService.setExpired(nextItem.id);
+				}
 
-		const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
-		const [info] = await this.youtubeService.getVideoInfos(url);
+				return nextItem?.resource.resource || null;
+			}
+			case ENTITY_TYPES.USER: {
+				const nextItem = await this.queueService.getNextQueueItem(
+					RESOURCE_TYPES.YOUTUBE_VIDEO,
+					interaction.guild.id,
+					interaction.member.id
+				);
 
-		this.voiceService.onVoiceIdle(audioPlayer, () => {
-			onVoiceIdle?.(audioPlayer, voiceConnection, audioResource);
-		});
+				if (nextItem) {
+					await this.queueService.setExpired(nextItem.id);
+				}
 
-		return info;
+				return nextItem?.resource.resource || null;
+			}
+			default: {
+				return null;
+			}
+		}
 	}
 }
