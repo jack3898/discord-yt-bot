@@ -20,5 +20,11 @@ export const webpackConfig: WebpackConfig = {
 			console.log(`👽 ${moduleName} (external)`);
 			callback(undefined, `commonjs ${moduleName}`);
 		}
+	],
+	ignoreWarnings: [
+		{
+			// Because the bot uses await import()
+			message: /the request of a dependency is an expression/
+		}
 	]
 };
