@@ -43,16 +43,16 @@ export class Myqueue implements ICommand {
 		if (resources.length) {
 			messageEmbed
 				.addFields(
-					resources.map((item, index) => ({
+					resources.map(({ video_details: videoDetails }, index) => ({
 						name: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_TITLE, {
 							index: index + 1,
-							videotitle: item.videoDetails.title
+							videotitle: videoDetails.title
 						}),
 						value: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_DETAILS, {
-							channel: item.videoDetails.author.name,
-							channelurl: item.videoDetails.author.channel_url,
-							views: this.botService.formatters.numberFormat.format(+item.videoDetails.viewCount),
-							videourl: item.videoDetails.video_url
+							channel: videoDetails.channel?.name,
+							channelurl: videoDetails.channel?.url,
+							views: this.botService.formatters.numberFormat.format(+videoDetails.views),
+							videourl: videoDetails.url
 						})
 					}))
 				)

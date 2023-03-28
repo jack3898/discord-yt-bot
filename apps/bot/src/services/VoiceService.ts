@@ -57,6 +57,10 @@ export class VoiceService {
 		VoiceService.voiceCache.set(guild.id, { voiceConnection, audioPlayer });
 		voiceConnection.subscribe(audioPlayer);
 
+		voiceConnection.on('stateChange', (oldState, newState) => {
+			console.info(`🟨 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+		});
+
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		return VoiceService.voiceCache.get(guild.id)!;
 	}

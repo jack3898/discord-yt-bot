@@ -1,6 +1,6 @@
 import { createAudioResource } from '@discordjs/voice';
+import { stream as startStream, video_basic_info as videoBasicInfo, yt_validate as ytValidate } from 'play-dl';
 import { singleton } from 'tsyringe';
-import ytdl from 'ytdl-core-discord';
 
 /**
  * Uses ytdl, @Discord.js/voice and the YouTube API to provide a simple abstraction for everything YouTube.
@@ -16,9 +16,9 @@ export class YouTubeService {
 	 * - Playlist URL (not yet implemented)
 	 */
 	getVideoUrls(resource: string): string[] {
-		if (ytdl.validateURL(resource)) {
+		if (resource.startsWith('https') && ytValidate(resource) === 'video') {
 			return [resource];
-		} else if (ytdl.validateID(resource)) {
+		} else if (ytValidate(resource) === 'video') {
 			return [`https://www.youtube.com/watch?v=${resource}`];
 		}
 
@@ -28,13 +28,15 @@ export class YouTubeService {
 	}
 
 	async createAudioResourceFromUrl(url: string) {
-		const bitstream = await ytdl(url, { filter: 'audioonly', highWaterMark: 1 << 25 });
+		const { stream } = await startStream(url, {
+			discordPlayerCompatibility: true
+		});
 
-		if (!bitstream) {
+		if (!stream) {
 			throw Error('Failed to create stream.');
 		}
 
-		return createAudioResource(bitstream);
+		return createAudioResource(stream);
 	}
 
 	/**
@@ -46,6 +48,6 @@ export class YouTubeService {
 	 * - Playlist URL (not yet implemented)
 	 */
 	getVideoInfos(resource: string) {
-		return Promise.all(this.getVideoUrls(resource).map((url) => ytdl.getBasicInfo(url)));
+		return Promise.all(this.getVideoUrls(resource).map((url) => videoBasicInfo(url)));
 	}
 }

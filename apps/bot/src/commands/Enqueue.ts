@@ -38,9 +38,9 @@ export class Enqueue implements ICommand {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
 			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-			const [video] = await this.youtubeService.getVideoInfos(resource);
+			const [{ video_details: videoDetails }] = await this.youtubeService.getVideoInfos(resource);
 
-			if (!video) {
+			if (!videoDetails || !videoDetails.id) {
 				return void interaction.reply({
 					content: COMMAND.ERROR.INVALID_RESOURCE,
 					ephemeral: true
@@ -50,7 +50,7 @@ export class Enqueue implements ICommand {
 			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.GUILD;
 
 			await this.queueService.addItemToQueue(
-				video.videoDetails.videoId,
+				videoDetails.id,
 				RESOURCE_TYPES.YOUTUBE_VIDEO,
 				interaction.member.id,
 				entityType === ENTITY_TYPES.GUILD ? interaction.guild.id : undefined
@@ -58,7 +58,7 @@ export class Enqueue implements ICommand {
 
 			await interaction.reply(
 				t(COMMAND.RESPONSE.SUCCESS, {
-					title: video.videoDetails.title
+					title: videoDetails.title
 				})
 			);
 		} catch (error) {

@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import playdl from 'play-dl';
 import { container } from 'tsyringe';
-import ytdl from 'ytdl-core-discord';
 import { YouTubeService } from './YouTubeService';
 
 const youtubeService = container.resolve(YouTubeService);
 
-jest.mock('ytdl-core-discord', () => ({
-	// __esModule: true,
-	...jest.requireActual('ytdl-core-discord'),
-	getBasicInfo: jest.fn()
+jest.mock('play-dl', () => ({
+	...jest.requireActual('play-dl'),
+	video_basic_info: jest.fn()
 }));
 
-const ytdlMock = jest.mocked(ytdl);
+const playdlMock = jest.mocked(playdl);
 
 afterEach(() => {
 	jest.resetAllMocks();
@@ -74,13 +73,13 @@ describe('getVideoUrls method', () => {
 
 describe('getVideoInfos method', () => {
 	it('should resolve video infos', async () => {
-		ytdlMock.getBasicInfo.mockResolvedValue({
+		playdlMock.video_basic_info.mockResolvedValue({
 			basicInfo: 'test'
 		} as any);
 
 		const result = await youtubeService.getVideoInfos('https://youtu.be/bSiEB64FyF8');
 
-		expect(ytdlMock.getBasicInfo).toHaveBeenCalled();
+		expect(playdlMock.video_basic_info).toHaveBeenCalled();
 		expect(result).toStrictEqual([{ basicInfo: 'test' }]);
 	});
 
