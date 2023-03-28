@@ -1,4 +1,4 @@
-import { ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import { ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
@@ -7,6 +7,8 @@ import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
 const COMMAND = LANG.COMMANDS.PLAY;
+
+type PlayAction = 'search' | ConstantsTypes.EntityType;
 
 @injectable()
 export class Play implements ICommand {
@@ -54,13 +56,14 @@ export class Play implements ICommand {
 				});
 			}
 
-			const type = interaction.options.getString(COMMAND.OPTION.TYPE.NAME, true);
+			const playAction = interaction.options.getString(COMMAND.OPTION.TYPE.NAME, true) as PlayAction;
 
 			await this.voiceService.startVoiceSession({
 				guild: interaction.guild,
 				voiceBasedChannel: commandAuthorVoiceChannel,
+				disconnectOnIdle: playAction === 'search',
 				resolveAudioResource: async () => {
-					const resource = await this.getResource(interaction, type);
+					const resource = await this.getResource(interaction, playAction);
 
 					if (!resource) {
 						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
@@ -92,8 +95,8 @@ export class Play implements ICommand {
 	 * If the type is search, then it will get the resource name provided by the user's slash command input.
 	 * Else, it will query the database to find the next item in the queue.
 	 */
-	async getResource(interaction: ChatInputCommandInteraction<'cached'>, type: string): Promise<string | null> {
-		switch (type) {
+	async getResource(interaction: ChatInputCommandInteraction<'cached'>, playAction: PlayAction): Promise<string | null> {
+		switch (playAction) {
 			case 'search': {
 				return interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME) || null;
 			}

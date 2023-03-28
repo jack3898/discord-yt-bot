@@ -4,18 +4,18 @@ import {
 	AudioResource,
 	createAudioPlayer,
 	joinVoiceChannel,
-	VoiceConnection
+	VoiceConnection,
+	VoiceConnectionStatus
 } from '@discordjs/voice';
 import { ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { Guild, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 
+type VoiceCacheValue = { voiceConnection: VoiceConnection; audioPlayer: AudioPlayer };
+
 @injectable()
 export class VoiceService {
-	private static readonly voiceCache = new Map<
-		Guild['id'],
-		{ voiceConnection: VoiceConnection; audioPlayer: AudioPlayer }
-	>();
+	private static readonly voiceCache = new Map<Guild['id'], VoiceCacheValue>();
 
 	/**
 	 * Get an audio player that has at least one subscribed connection
@@ -40,25 +40,41 @@ export class VoiceService {
 		});
 	}
 
+	/**
+	 * Destroy a voice connection if it exists and is not already destroyed.
+	 */
+	destroyConnection(guildId: string) {
+		const potentialVoiceConnection = VoiceService.voiceCache.get(guildId)?.voiceConnection;
+
+		if (potentialVoiceConnection?.state.status !== VoiceConnectionStatus.Destroyed) {
+			potentialVoiceConnection?.destroy();
+		}
+	}
+
 	joinVoice(
 		guild: Guild,
 		voiceBasedChannel: VoiceBasedChannel
 	): { audioPlayer: AudioPlayer; voiceConnection: VoiceConnection } {
+		// Prevent duplicate connections
+		this.destroyConnection(guild.id);
+
 		const voiceConnection = joinVoiceChannel({
 			guildId: guild.id,
 			channelId: voiceBasedChannel.id,
 			adapterCreator: guild.voiceAdapterCreator
 		});
 
-		const audioPlayer = createAudioPlayer();
-
-		audioPlayer.setMaxListeners(1);
+		const audioPlayer = createAudioPlayer().setMaxListeners(2);
 
 		VoiceService.voiceCache.set(guild.id, { voiceConnection, audioPlayer });
 		voiceConnection.subscribe(audioPlayer);
 
 		voiceConnection.on('stateChange', (oldState, newState) => {
-			console.info(`🟨 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+		});
+
+		audioPlayer.on('stateChange', (oldState, newState) => {
+			console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
 		});
 
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -74,11 +90,13 @@ export class VoiceService {
 	async startVoiceSession({
 		guild,
 		voiceBasedChannel,
-		resolveAudioResource
+		resolveAudioResource,
+		disconnectOnIdle = false
 	}: {
 		guild: Guild;
 		voiceBasedChannel: VoiceBasedChannel;
 		resolveAudioResource: () => Promise<AudioResource | ConstantsTypes.VoiceConnectionSignals>;
+		disconnectOnIdle?: boolean;
 	}) {
 		const { audioPlayer, voiceConnection } = this.joinVoice(guild, voiceBasedChannel);
 
@@ -98,6 +116,12 @@ export class VoiceService {
 
 		await playNextQueueItem();
 
-		this.onVoiceIdle(audioPlayer, playNextQueueItem);
+		this.onVoiceIdle(audioPlayer, () => {
+			if (disconnectOnIdle) {
+				this.destroyConnection(guild.id);
+			} else {
+				playNextQueueItem();
+			}
+		});
 	}
 }
