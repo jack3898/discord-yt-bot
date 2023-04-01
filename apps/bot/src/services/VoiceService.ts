@@ -13,9 +13,9 @@ import { injectable } from 'tsyringe';
 
 @injectable()
 export class VoiceService {
-	private static readonly voiceConnections = new Map<Guild['id'], VoiceConnection>();
+	static voiceConnections = new Map<Guild['id'], VoiceConnection>();
 
-	private static readonly audioPlayers = new Map<Guild['id'], AudioPlayer>();
+	static audioPlayers = new Map<Guild['id'], AudioPlayer>();
 
 	/**
 	 * Get an audio player that has at least one subscribed connection
@@ -89,10 +89,6 @@ export class VoiceService {
 		return audioPlayer;
 	}
 
-	getAudioPlayer(guild: Guild) {
-		return VoiceService.audioPlayers.get(guild.id);
-	}
-
 	/**
 	 * This function will join the voice channel and handles the new voice session.
 	 *
@@ -142,7 +138,7 @@ export class VoiceService {
 				return onVoiceIdleFn();
 			}
 
-			this.getAudioPlayer(guild)?.play(resolveAudioResourceOnIdleResult);
+			this.getActiveAudioPlayer(guild.id)?.play(resolveAudioResourceOnIdleResult);
 		};
 
 		this.onVoiceIdle(audioPlayer, onVoiceIdleFn);

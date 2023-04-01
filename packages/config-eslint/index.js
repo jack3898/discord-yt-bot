@@ -3,7 +3,7 @@ module.exports = {
 	extends: [
 		'eslint:recommended',
 		'plugin:@typescript-eslint/recommended',
-		'plugin:prettier/recommended'
+		'plugin:prettier/recommended',
 	],
 	parser: '@typescript-eslint/parser',
 	parserOptions: {
@@ -26,8 +26,8 @@ module.exports = {
 				endOfLine: 'lf'
 			}
 		],
-		indent: 'off',
+		'indent': 'off',
 		'linebreak-style': ['error', 'unix'],
-		semi: ['error', 'always']
+		semi: ['error', 'always'],
 	}
 };
