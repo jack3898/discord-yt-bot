@@ -60,13 +60,17 @@ export class VoiceService {
 	createVoiceConnection(guild: Guild, channel: VoiceBasedChannel): VoiceConnection {
 		this.destroyConnection(guild.id);
 
-		return joinVoiceChannel({
+		const voiceConnection = joinVoiceChannel({
 			guildId: guild.id,
 			channelId: channel.id,
 			adapterCreator: guild.voiceAdapterCreator
 		}).on('stateChange', (oldState, newState) => {
-			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 		});
+
+		VoiceService.voiceConnections.set(guild.id, voiceConnection);
+
+		return voiceConnection;
 	}
 
 	/**
@@ -76,7 +80,7 @@ export class VoiceService {
 		const audioPlayer = createAudioPlayer()
 			.setMaxListeners(2)
 			.on('stateChange', (oldState, newState) => {
-				console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+				console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 			});
 
 		VoiceService.audioPlayers.set(guild.id, audioPlayer);
@@ -119,16 +123,22 @@ export class VoiceService {
 
 		const onVoiceIdleFn = async (): Promise<void> => {
 			if (disconnectOnFirstIdle) {
+				console.info(`🟨 Disconnect on first idle for guild ${guild.name}.`);
+
 				return this.destroyConnection(guild.id);
 			}
 
 			const resolveAudioResourceOnIdleResult = await resolveAudioResource();
 
 			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.DISCONNECT) {
+				console.info(`🟨 Signal disconnect received for guild ${guild.name}.`);
+
 				return this.destroyConnection(guild.id);
 			}
 
 			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.COMPLETE) {
+				console.info(`🟨 Signal complete received for guild ${guild.name}.`);
+
 				return onVoiceIdleFn();
 			}
 

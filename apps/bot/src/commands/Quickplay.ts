@@ -52,7 +52,13 @@ export class Quickplay implements ICommand {
 						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
 					}
 
-					return this.youtubeService.createAudioResourceFromUrl(url);
+					const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
+
+					if (!audioResource) {
+						return VOICE_CONNECTION_SIGNALS.COMPLETE;
+					}
+
+					return audioResource;
 				}
 			});
 
