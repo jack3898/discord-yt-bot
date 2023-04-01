@@ -11,20 +11,20 @@ import { ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { Guild, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 
-type VoiceCacheValue = { voiceConnection: VoiceConnection; audioPlayer: AudioPlayer };
-
 @injectable()
 export class VoiceService {
-	private static readonly voiceCache = new Map<Guild['id'], VoiceCacheValue>();
+	private static readonly voiceConnections = new Map<Guild['id'], VoiceConnection>();
+
+	private static readonly audioPlayers = new Map<Guild['id'], AudioPlayer>();
 
 	/**
 	 * Get an audio player that has at least one subscribed connection
 	 */
 	getActiveAudioPlayer(guildId: Guild['id']): AudioPlayer | undefined {
-		const voiceCacheItem = VoiceService.voiceCache.get(guildId);
+		const currentAudioPlayer = VoiceService.audioPlayers.get(guildId);
 
-		if (voiceCacheItem?.audioPlayer.playable.length) {
-			return voiceCacheItem?.audioPlayer;
+		if (currentAudioPlayer?.playable.length) {
+			return currentAudioPlayer;
 		}
 	}
 
@@ -44,41 +44,49 @@ export class VoiceService {
 	 * Destroy a voice connection if it exists and is not already destroyed.
 	 */
 	destroyConnection(guildId: string) {
-		const potentialVoiceConnection = VoiceService.voiceCache.get(guildId)?.voiceConnection;
+		const potentialVoiceConnection = VoiceService.voiceConnections.get(guildId);
 
 		if (potentialVoiceConnection?.state.status !== VoiceConnectionStatus.Destroyed) {
 			potentialVoiceConnection?.destroy();
 		}
 	}
 
-	joinVoice(
-		guild: Guild,
-		voiceBasedChannel: VoiceBasedChannel
-	): { audioPlayer: AudioPlayer; voiceConnection: VoiceConnection } {
-		// Prevent duplicate connections
+	/**
+	 * Make the bot join the voice channel.
+	 *
+	 * Wrapper over the @discordjs/voice joinVoiceChannel function, discards and destroys previous
+	 * voice connections to hopefully prevent memory leaks.
+	 */
+	createVoiceConnection(guild: Guild, channel: VoiceBasedChannel): VoiceConnection {
 		this.destroyConnection(guild.id);
 
-		const voiceConnection = joinVoiceChannel({
+		return joinVoiceChannel({
 			guildId: guild.id,
-			channelId: voiceBasedChannel.id,
+			channelId: channel.id,
 			adapterCreator: guild.voiceAdapterCreator
-		});
-
-		const audioPlayer = createAudioPlayer().setMaxListeners(2);
-
-		VoiceService.voiceCache.set(guild.id, { voiceConnection, audioPlayer });
-		voiceConnection.subscribe(audioPlayer);
-
-		voiceConnection.on('stateChange', (oldState, newState) => {
+		}).on('stateChange', (oldState, newState) => {
 			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
 		});
+	}
 
-		audioPlayer.on('stateChange', (oldState, newState) => {
-			console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
-		});
+	/**
+	 * Create and cache the audio player.
+	 */
+	createAudioPlayer(guild: Guild, voiceConnectionToSubscribe: VoiceConnection): AudioPlayer {
+		const audioPlayer = createAudioPlayer()
+			.setMaxListeners(2)
+			.on('stateChange', (oldState, newState) => {
+				console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}`);
+			});
 
-		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-		return VoiceService.voiceCache.get(guild.id)!;
+		VoiceService.audioPlayers.set(guild.id, audioPlayer);
+		voiceConnectionToSubscribe.subscribe(audioPlayer);
+
+		return audioPlayer;
+	}
+
+	getAudioPlayer(guild: Guild) {
+		return VoiceService.audioPlayers.get(guild.id);
 	}
 
 	/**
@@ -91,37 +99,44 @@ export class VoiceService {
 		guild,
 		voiceBasedChannel,
 		resolveAudioResource,
-		disconnectOnIdle = false
+		disconnectOnFirstIdle = false
 	}: {
 		guild: Guild;
 		voiceBasedChannel: VoiceBasedChannel;
 		resolveAudioResource: () => Promise<AudioResource | ConstantsTypes.VoiceConnectionSignals>;
-		disconnectOnIdle?: boolean;
-	}) {
-		const { audioPlayer, voiceConnection } = this.joinVoice(guild, voiceBasedChannel);
+		disconnectOnFirstIdle?: boolean;
+	}): Promise<{ voiceConnection: VoiceConnection; audioPlayer: AudioPlayer } | null> {
+		const resolveAudioResourceResult = await resolveAudioResource();
 
-		async function playNextQueueItem() {
-			const nextResource = await resolveAudioResource();
-
-			if (nextResource === VOICE_CONNECTION_SIGNALS.DISCONNECT || !nextResource) {
-				return void voiceConnection.destroy();
-			}
-
-			// Prevents the 'signalling' state that seems to happen after a while
-			// (seems to happen when audioPlayer.play has been invoked more than once for a single connection)
-			voiceConnection.configureNetworking();
-
-			audioPlayer.play(nextResource);
+		if (!(resolveAudioResourceResult instanceof AudioResource)) {
+			return null;
 		}
 
-		await playNextQueueItem();
+		const voiceConnection = this.createVoiceConnection(guild, voiceBasedChannel);
+		const audioPlayer = this.createAudioPlayer(guild, voiceConnection);
 
-		this.onVoiceIdle(audioPlayer, () => {
-			if (disconnectOnIdle) {
-				this.destroyConnection(guild.id);
-			} else {
-				playNextQueueItem();
+		audioPlayer.play(resolveAudioResourceResult);
+
+		const onVoiceIdleFn = async (): Promise<void> => {
+			if (disconnectOnFirstIdle) {
+				return this.destroyConnection(guild.id);
 			}
-		});
+
+			const resolveAudioResourceOnIdleResult = await resolveAudioResource();
+
+			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.DISCONNECT) {
+				return this.destroyConnection(guild.id);
+			}
+
+			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.COMPLETE) {
+				return onVoiceIdleFn();
+			}
+
+			this.getAudioPlayer(guild)?.play(resolveAudioResourceOnIdleResult);
+		};
+
+		this.onVoiceIdle(audioPlayer, onVoiceIdleFn);
+
+		return { voiceConnection, audioPlayer };
 	}
 }

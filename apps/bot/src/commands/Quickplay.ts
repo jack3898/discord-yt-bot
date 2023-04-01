@@ -1,31 +1,21 @@
-import { ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { QueueService, VoiceService } from '../services';
-import { YouTubeService } from '../services/YouTubeService';
+import { VoiceService, YouTubeService } from '../services';
 import { ICommand } from '../types/ICommand';
 
-const COMMAND = LANG.COMMANDS.PLAY;
+const COMMAND = LANG.COMMANDS.QUICKPLAY;
 
 @injectable()
-export class Play implements ICommand {
-	constructor(
-		private voiceService: VoiceService,
-		private youtubeService: YouTubeService,
-		private queueService: QueueService
-	) {}
+export class Quickplay implements ICommand {
+	constructor(private voiceService: VoiceService, private youtubeService: YouTubeService) {}
 
 	definition = new SlashCommandBuilder()
 		.setName(COMMAND.NAME)
 		.setDescription(COMMAND.DESC)
 		.addStringOption((option) =>
-			option
-				.setName(COMMAND.OPTION.TYPE.NAME)
-				.setDescription(COMMAND.OPTION.TYPE.DESC)
-				.addChoices({ name: COMMAND.OPTION.TYPE.OPTIONS.SERVER_QUEUE, value: ENTITY_TYPES.GUILD })
-				.addChoices({ name: COMMAND.OPTION.TYPE.OPTIONS.YOUR_QUEUE, value: ENTITY_TYPES.USER })
-				.setRequired(true)
+			option.setName(COMMAND.OPTION.RESOURCE.NAME).setDescription(COMMAND.OPTION.RESOURCE.DESC).setRequired(true)
 		)
 		.setDMPermission(false);
 
@@ -50,29 +40,12 @@ export class Play implements ICommand {
 				});
 			}
 
-			const playAction = interaction.options.getString(COMMAND.OPTION.TYPE.NAME, true) as ConstantsTypes.EntityType;
-
 			const startVoiceSessionResult = await this.voiceService.startVoiceSession({
 				guild: interaction.guild,
 				voiceBasedChannel: commandAuthorVoiceChannel,
-				disconnectOnFirstIdle: false,
+				disconnectOnFirstIdle: true,
 				resolveAudioResource: async () => {
-					const nextItem = await this.queueService.getNextQueueItem(
-						RESOURCE_TYPES.YOUTUBE_VIDEO,
-						interaction.guild.id,
-						playAction === ENTITY_TYPES.USER ? interaction.member.id : undefined
-					);
-
-					if (nextItem) {
-						await this.queueService.setExpired(nextItem.id);
-					}
-
-					const resource = nextItem?.resource.resource || null;
-
-					if (!resource) {
-						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-					}
-
+					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
 					const [url] = this.youtubeService.getVideoUrls(resource);
 
 					if (!url) {
@@ -87,7 +60,7 @@ export class Play implements ICommand {
 				return await interaction.reply(COMMAND.RESPONSE.SUCCESS);
 			}
 
-			await interaction.reply({
+			interaction.reply({
 				content: COMMAND.ERROR.INVALID_RESOURCE,
 				ephemeral: true
 			});

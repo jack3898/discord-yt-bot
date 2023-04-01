@@ -9,18 +9,35 @@ export default {
 			NAME: 'play',
 			DESC: 'Play an audio resource in a voice channel you are connected to.',
 			OPTION: {
-				RESOURCE: {
-					NAME: 'resource',
-					DESC: 'A YouTube video URL or ID. Ignored if the previous option is not set to "search".'
-				},
 				TYPE: {
 					NAME: 'type',
-					DESC: 'What would you like to play?',
+					DESC: 'What would you like to play? Use /quickplay if you want to play a single track.',
 					OPTIONS: {
 						SERVER_QUEUE: 'Server queue',
 						YOUR_QUEUE: 'Your queue',
 						SEARCH: 'Search'
 					}
+				}
+			},
+			ERROR: {
+				NO_VOICE_CONN: 'You must be connected to a voice channel to use this command.',
+				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.',
+				INVALID_RESOURCE: 'The queue is empty or the provided resource is invalid.',
+				INTERNAL_ERROR:
+					'There was an internal server problem. There is a chance this is because the video is private or age restricted.',
+				NO_ITEM: 'The queue is empty!'
+			},
+			RESPONSE: {
+				SUCCESS: 'Now playing the audio.'
+			}
+		},
+		QUICKPLAY: {
+			NAME: 'quickplay',
+			DESC: "You don't care about queues! Play a single track!",
+			OPTION: {
+				RESOURCE: {
+					NAME: 'resource',
+					DESC: 'A YouTube video URL or ID.'
 				}
 			},
 			ERROR: {

@@ -16,13 +16,13 @@ export class YouTubeService {
 	 * - Playlist URL (not yet implemented)
 	 */
 	getVideoUrls(resource: string): string[] {
+		// return [];
+
 		if (resource.startsWith('https') && ytValidate(resource) === 'video') {
 			return [resource];
 		} else if (ytValidate(resource) === 'video') {
 			return [`https://www.youtube.com/watch?v=${resource}`];
 		}
-
-		// search term and playlist URL coming later
 
 		return [];
 	}
