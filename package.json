@@ -8,7 +8,7 @@
         "init": "yarn install && yarn run build && yarn run db:push",
         "lint": "turbo run lint --parallel",
         "test": "turbo run test --parallel",
-        "test:watch": "turbo run test --parallel -- --watch",
+        "test:watch": "turbo run test --parallel -- --watch --silent",
         "build": "turbo run build --parallel",
         "start": "turbo run start --filter=$SCOPE",
         "start:all": "turbo run start --parallel",

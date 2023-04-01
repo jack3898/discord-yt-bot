@@ -2,7 +2,7 @@ import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, DatabaseService } from '../services';
+import { BotService, DatabaseService, QueueService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -13,6 +13,7 @@ export class Queue implements ICommand {
 	constructor(
 		private botService: BotService,
 		private dbService: DatabaseService,
+		private queueService: QueueService,
 		private youtubeService: YouTubeService
 	) {}
 
@@ -21,15 +22,7 @@ export class Queue implements ICommand {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		const guildId = interaction.guildId;
 
-		await this.dbService.createEntitiesIfNotExists({ guildId });
-
-		const queueLen = 10;
-
-		const queue = await this.dbService.queue.findMany({
-			where: { discordGuildId: guildId },
-			select: { resource: { select: { resource: true } } },
-			take: queueLen
-		});
+		const queue = await this.queueService.getQueue(interaction.member.id, interaction.guild.id);
 
 		const count = await this.dbService.queue.count({
 			where: { discordGuildId: guildId }
@@ -48,22 +41,22 @@ export class Queue implements ICommand {
 		if (resources.length) {
 			messageEmbed
 				.addFields(
-					resources.map((item, index) => ({
+					resources.map(({ video_details: videoDetails }, index) => ({
 						name: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_TITLE, {
 							index: index + 1,
-							videotitle: item.videoDetails.title
+							videotitle: videoDetails.title
 						}),
 						value: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_DETAILS, {
-							channel: item.videoDetails.author.name,
-							channelurl: item.videoDetails.author.channel_url,
-							views: this.botService.formatters.numberFormat.format(+item.videoDetails.viewCount),
-							videourl: item.videoDetails.video_url
+							channel: videoDetails.channel?.name,
+							channelurl: videoDetails.channel?.url,
+							views: this.botService.formatters.numberFormat.format(+videoDetails.views),
+							videourl: videoDetails.url
 						})
 					}))
 				)
 				.setFooter({
 					text: t(COMMAND.RESPONSE.SUCCESS_EMBED.FOOTER, {
-						defaultcount: this.botService.formatters.numberFormat.format(queueLen),
+						defaultcount: this.botService.formatters.numberFormat.format(this.queueService.recommendedPageSize),
 						count
 					})
 				});

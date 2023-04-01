@@ -2,7 +2,7 @@ import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, DatabaseService } from '../services';
+import { BotService, DatabaseService, QueueService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -13,6 +13,7 @@ export class Myqueue implements ICommand {
 	constructor(
 		private botService: BotService,
 		private dbService: DatabaseService,
+		private queueService: QueueService,
 		private youtubeService: YouTubeService
 	) {}
 
@@ -21,15 +22,9 @@ export class Myqueue implements ICommand {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		const userId = interaction.user.id;
 
-		await this.dbService.createEntitiesIfNotExists({ userId });
-
 		const queueLen = 10;
 
-		const queue = await this.dbService.queue.findMany({
-			where: { discordUserId: userId },
-			select: { resource: { select: { resource: true } } },
-			take: queueLen
-		});
+		const queue = await this.queueService.getQueue(interaction.user.id);
 
 		const count = await this.dbService.queue.count({
 			where: { discordUserId: userId }
@@ -48,16 +43,16 @@ export class Myqueue implements ICommand {
 		if (resources.length) {
 			messageEmbed
 				.addFields(
-					resources.map((item, index) => ({
+					resources.map(({ video_details: videoDetails }, index) => ({
 						name: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_TITLE, {
 							index: index + 1,
-							videotitle: item.videoDetails.title
+							videotitle: videoDetails.title
 						}),
 						value: t(COMMAND.RESPONSE.SUCCESS_EMBED.ITEM_DETAILS, {
-							channel: item.videoDetails.author.name,
-							channelurl: item.videoDetails.author.channel_url,
-							views: this.botService.formatters.numberFormat.format(+item.videoDetails.viewCount),
-							videourl: item.videoDetails.video_url
+							channel: videoDetails.channel?.name,
+							channelurl: videoDetails.channel?.url,
+							views: this.botService.formatters.numberFormat.format(+videoDetails.views),
+							videourl: videoDetails.url
 						})
 					}))
 				)

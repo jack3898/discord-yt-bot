@@ -1,9 +1,9 @@
-import { ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
+import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { t } from '@yt-bot/i18n';
 import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
-import { BotService, DatabaseService, QueueService, ShardManagerService } from '../services';
+import { QueueService } from '../services';
 import { YouTubeService } from '../services/YouTubeService';
 import { ICommand } from '../types/ICommand';
 
@@ -11,13 +11,7 @@ const COMMAND = LANG.COMMANDS.ENQUEUE;
 
 @injectable()
 export class Enqueue implements ICommand {
-	constructor(
-		public botService: BotService,
-		public shardManagerService: ShardManagerService,
-		public dbService: DatabaseService,
-		public youtubeService: YouTubeService,
-		public queueService: QueueService
-	) {}
+	constructor(private youtubeService: YouTubeService, private queueService: QueueService) {}
 
 	definition = new SlashCommandBuilder()
 		.setName(COMMAND.NAME)
@@ -44,9 +38,9 @@ export class Enqueue implements ICommand {
 	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
 		try {
 			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-			const [video] = await this.youtubeService.getVideoInfos(resource);
+			const [{ video_details: videoDetails }] = await this.youtubeService.getVideoInfos(resource);
 
-			if (!video) {
+			if (!videoDetails || !videoDetails.id) {
 				return void interaction.reply({
 					content: COMMAND.ERROR.INVALID_RESOURCE,
 					ephemeral: true
@@ -55,33 +49,16 @@ export class Enqueue implements ICommand {
 
 			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.GUILD;
 
-			const [dbUser, dbGuild] = await this.dbService.createEntitiesIfNotExists({
-				userId: interaction.user.id,
-				guildId: interaction.guildId
-			});
-
-			const entityTranslation = {
-				[ENTITY_TYPES.GUILD]: {
-					entity: dbGuild,
-					feedback: COMMAND.DESTINATIONS.SERVER
-				},
-				[ENTITY_TYPES.USER]: {
-					entity: dbUser,
-					feedback: COMMAND.DESTINATIONS.USER
-				}
-			}[entityType];
-
 			await this.queueService.addItemToQueue(
-				video.videoDetails.videoId,
-				entityType as ConstantsTypes.EntityType,
+				videoDetails.id,
 				RESOURCE_TYPES.YOUTUBE_VIDEO,
-				entityTranslation?.entity
+				interaction.member.id,
+				entityType === ENTITY_TYPES.GUILD ? interaction.guild.id : undefined
 			);
 
 			await interaction.reply(
 				t(COMMAND.RESPONSE.SUCCESS, {
-					title: video.videoDetails.title,
-					destination: entityTranslation?.feedback
+					title: videoDetails.title
 				})
 			);
 		} catch (error) {
