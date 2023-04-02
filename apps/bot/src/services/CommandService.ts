@@ -1,5 +1,7 @@
 import { type InjectionToken, container, singleton } from 'tsyringe';
 import type { ICommand } from '../types/ICommand';
+import type { RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { RestService } from './RestService';
 import type { constructor } from 'tsyringe/dist/typings/types';
 
 /**
@@ -8,6 +10,8 @@ import type { constructor } from 'tsyringe/dist/typings/types';
  */
 @singleton()
 export class CommandService {
+	constructor(private restService: RestService) {}
+
 	commandInjectionTokens = new Map<string, InjectionToken<ICommand>>();
 
 	registerClassToken(commandClass: constructor<ICommand>) {
@@ -17,7 +21,7 @@ export class CommandService {
 
 		this.commandInjectionTokens.set(instance.definition.name, commandClass);
 
-		console.log(`🟩 Command "${instance.definition.name}" loaded.`);
+		return instance;
 	}
 
 	getCommandInstanceBySlashCommandName(commandName: string) {
@@ -35,5 +39,21 @@ export class CommandService {
 
 	getCommandBuildersAsJson() {
 		return this.getCommandBuilders().map((builder) => builder.toJSON());
+	}
+
+	/**
+	 * Publishes an array of commands to the Discord API for use as slash commands.
+	 */
+	async publishSlashCommands(commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]) {
+		try {
+			await this.restService.put(this.restService.commandsRoute, { body: commands });
+
+			console.log('🟩 Slash commands registered to the Discord API.');
+		} catch (error: unknown) {
+			console.error('🟥 Failed to register slash commands.');
+
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			throw new Error(error as any);
+		}
 	}
 }

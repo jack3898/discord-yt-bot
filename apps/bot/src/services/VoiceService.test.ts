@@ -21,8 +21,6 @@ jest.mock('@discordjs/voice', () => ({
 	AudioResource: class AudioResource {}
 }));
 
-let voiceService: VoiceService;
-
 const joinVoiceChannelMock = jest.mocked(joinVoiceChannel);
 const createAudioPlayerMock = jest.mocked(createAudioPlayer);
 const AudioResourceMock = AudioResource as any;
@@ -45,7 +43,6 @@ let createAudioPlayerMockReturn: {
 };
 
 beforeEach(() => {
-	voiceService = container.resolve(VoiceService);
 	VoiceService.voiceConnections = new Map();
 	VoiceService.audioPlayers = new Map();
 
@@ -73,10 +70,14 @@ beforeEach(() => {
 
 describe('getActiveAudioPlayer', () => {
 	it('should return undefined if an audio player does not exist in the cache', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(undefined);
 	});
 
 	it('should return an audio player', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		const audioPlayerMock = { playable: { length: 1 } };
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
@@ -85,6 +86,8 @@ describe('getActiveAudioPlayer', () => {
 	});
 
 	it('should NOT return an audio player if the amount of subscribed connections is 0', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		const audioPlayerMock = { playable: { length: 0 } };
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
@@ -95,6 +98,8 @@ describe('getActiveAudioPlayer', () => {
 
 describe('onVoiceIdle', () => {
 	it('should attach an event listener to the instance passed in', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		const eventSpy = {
 			on: jest.fn()
 		} as unknown as AudioPlayer;
@@ -105,6 +110,7 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should run the event listener callback function on voice idle', () => {
+		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -116,6 +122,7 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should NOT run the event listener callback when was not previous playing', () => {
+		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -127,6 +134,7 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should NOT run the event listener callback when new state is not idle', () => {
+		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -140,6 +148,7 @@ describe('onVoiceIdle', () => {
 
 describe('destroyConnection', () => {
 	it('should destroy a connection that exists in the cache', () => {
+		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Ready },
 			destroy: jest.fn()
@@ -153,6 +162,7 @@ describe('destroyConnection', () => {
 	});
 
 	it('should NOT destroy a connection that is already destroyed', () => {
+		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Destroyed },
 			destroy: jest.fn()
@@ -166,6 +176,7 @@ describe('destroyConnection', () => {
 	});
 
 	it('should silently fail if the voice connection has not yet been cached', () => {
+		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Destroyed },
 			destroy: jest.fn()
@@ -179,6 +190,7 @@ describe('destroyConnection', () => {
 
 describe('createVoiceConnection', () => {
 	it('should destroy an existing connection first to prevent memory leaks', () => {
+		const voiceService = container.resolve(VoiceService);
 		const destroyConnectionSpy = jest.spyOn(voiceService, 'destroyConnection');
 
 		voiceService.createVoiceConnection({} as unknown as Guild, {} as unknown as VoiceBasedChannel);
@@ -187,6 +199,8 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should join the voice channel', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		const guildSpy = {
 			id: 'guild id',
 			voiceAdapterCreator: 'pretend I am a function'
@@ -206,6 +220,7 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should cache the voice connection', () => {
+		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionsMapSetSpy = jest.spyOn(VoiceService.voiceConnections, 'set');
 
 		const guildSpy = {
@@ -226,6 +241,8 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should return the voice connection', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		const guildSpy = {
 			id: 'guild id',
 			voiceAdapterCreator: 'pretend I am a function'
@@ -251,12 +268,15 @@ describe('createAudioPlayer', () => {
 	} as unknown as VoiceConnection;
 
 	it('should create an audio player', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
 
 		expect(createAudioPlayerMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('should cache the audio player', () => {
+		const voiceService = container.resolve(VoiceService);
 		const audioPlayersMapSetSpy = jest.spyOn(VoiceService.audioPlayers, 'set');
 
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
@@ -265,6 +285,8 @@ describe('createAudioPlayer', () => {
 	});
 
 	it('should subscribe the audio player to the voice connection', () => {
+		const voiceService = container.resolve(VoiceService);
+
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
 
 		expect(voiceConnectionMock.subscribe).toHaveBeenCalledTimes(1);
@@ -279,8 +301,11 @@ describe('startVoiceSession', () => {
 	let createVoiceConnectionSpy: any;
 	let createAudioPlayerSpy: any;
 	let audioPlayerMock: any;
+	let voiceService: VoiceService;
 
 	beforeEach(() => {
+		voiceService = container.resolve(VoiceService);
+
 		audioPlayerMock = new (class AudioPlayerMock extends EventEmitter {
 			play = jest.fn();
 		})();
