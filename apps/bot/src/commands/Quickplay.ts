@@ -1,9 +1,9 @@
-import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { injectable } from 'tsyringe';
-import { LANG } from '../langpacks';
+import { type ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { VoiceService, YouTubeService } from '../services';
-import { ICommand } from '../types/ICommand';
+import type { ICommand } from '../types/ICommand';
+import { LANG } from '../langpacks';
+import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import { injectable } from 'tsyringe';
 
 const COMMAND = LANG.COMMANDS.QUICKPLAY;
 

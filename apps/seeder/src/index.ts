@@ -1,5 +1,5 @@
-import { RESOURCE_TYPES } from '@yt-bot/constants';
 import { PrismaClient } from '@yt-bot/database';
+import { RESOURCE_TYPES } from '@yt-bot/constants';
 
 const seederClient = new PrismaClient();
 

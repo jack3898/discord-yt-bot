@@ -1,8 +1,8 @@
-import { getVoiceConnection } from '@discordjs/voice';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { injectable } from 'tsyringe';
+import type { CommandInteraction, ICommand } from '../types';
 import { LANG } from '../langpacks';
-import { ICommand } from '../types/ICommand';
+import { SlashCommandBuilder } from 'discord.js';
+import { getVoiceConnection } from '@discordjs/voice';
+import { injectable } from 'tsyringe';
 
 const COMMAND = LANG.COMMANDS.STOP;
 
@@ -10,7 +10,7 @@ const COMMAND = LANG.COMMANDS.STOP;
 export class Stop implements ICommand {
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC).setDMPermission(false);
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: CommandInteraction) {
 		try {
 			const botVoiceConnection = getVoiceConnection(interaction.guildId);
 

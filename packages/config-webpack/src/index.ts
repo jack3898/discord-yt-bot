@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Configuration as WebpackConfig, Stats, webpack } from 'webpack';
+import { type Stats, type Configuration as WebpackConfig, webpack } from 'webpack';
 import { webpackConfig } from './webpack.config';
 
 /**

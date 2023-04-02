@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-	AudioPlayer,
+	type AudioPlayer,
 	AudioPlayerStatus,
 	AudioResource,
-	VoiceConnection,
+	type VoiceConnection,
 	VoiceConnectionStatus,
 	createAudioPlayer,
 	joinVoiceChannel
 } from '@discordjs/voice';
-import { Guild, VoiceBasedChannel } from 'discord.js';
+import type { Guild, VoiceBasedChannel } from 'discord.js';
 import EventEmitter from 'events';
-import { container } from 'tsyringe';
-import { VoiceService } from './VoiceService';
 import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import { VoiceService } from './VoiceService';
+import { container } from 'tsyringe';
 
 jest.mock('@discordjs/voice', () => ({
 	...jest.requireActual('@discordjs/voice'),

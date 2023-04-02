@@ -1,5 +1,5 @@
-import { ConstantsTypes } from '@yt-bot/constants';
-import { DiscordGuild, DiscordUser, PrismaClient } from '@yt-bot/database';
+import { type DiscordGuild, type DiscordUser, PrismaClient } from '@yt-bot/database';
+import type { ConstantsTypes } from '@yt-bot/constants';
 import { singleton } from 'tsyringe';
 
 /**

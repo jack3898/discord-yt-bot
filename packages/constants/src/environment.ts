@@ -1,5 +1,5 @@
-import path from 'path';
+import { resolve } from 'path';
 
-export const ROOT = path.resolve(__dirname, '..', '..', '..');
-export const ROOT_NODE_MODULES = path.resolve(ROOT, 'node_modules');
-export const ROOT_ENV_FILE = path.resolve(ROOT, '.env');
+export const ROOT = resolve(__dirname, '..', '..', '..');
+export const ROOT_NODE_MODULES = resolve(ROOT, 'node_modules');
+export const ROOT_ENV_FILE = resolve(ROOT, '.env');

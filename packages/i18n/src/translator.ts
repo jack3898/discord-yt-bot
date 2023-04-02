@@ -1,4 +1,4 @@
-import handlebars, { TemplateDelegate } from 'handlebars';
+import handlebars, { type TemplateDelegate } from 'handlebars';
 
 const cache = new Map<string, TemplateDelegate>();
 

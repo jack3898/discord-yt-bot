@@ -1,10 +1,10 @@
-import { ROOT } from '@yt-bot/constants/src/environment';
-import { t } from '@yt-bot/i18n';
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import path from 'path';
-import { injectable } from 'tsyringe';
+import type { CommandInteraction, ICommand } from '../types';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
 import { LANG } from '../langpacks';
-import { ICommand } from '../types/ICommand';
+import { ROOT } from '@yt-bot/constants/src/environment';
+import { injectable } from 'tsyringe';
+import path from 'path';
+import { t } from '@yt-bot/i18n';
 
 const COMMAND = LANG.COMMANDS.ABOUT;
 
@@ -12,7 +12,7 @@ const COMMAND = LANG.COMMANDS.ABOUT;
 export class About implements ICommand {
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC);
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: CommandInteraction) {
 		try {
 			const rootPackageJson: Record<PropertyKey, unknown> | undefined = await import(
 				path.resolve(ROOT, 'package.json')

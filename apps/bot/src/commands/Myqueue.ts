@@ -1,10 +1,10 @@
-import { t } from '@yt-bot/i18n';
-import { ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
-import { injectable } from 'tsyringe';
-import { LANG } from '../langpacks';
 import { BotService, DatabaseService, QueueService } from '../services';
+import type { CommandInteraction, ICommand } from '../types';
+import { EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { LANG } from '../langpacks';
 import { YouTubeService } from '../services/YouTubeService';
-import { ICommand } from '../types/ICommand';
+import { injectable } from 'tsyringe';
+import { t } from '@yt-bot/i18n';
 
 const COMMAND = LANG.COMMANDS.MYQUEUE;
 
@@ -19,7 +19,7 @@ export class Myqueue implements ICommand {
 
 	definition = new SlashCommandBuilder().setName(COMMAND.NAME).setDescription(COMMAND.DESC);
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: CommandInteraction) {
 		const userId = interaction.user.id;
 
 		const queueLen = 10;

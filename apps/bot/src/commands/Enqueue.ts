@@ -1,11 +1,11 @@
+import type { CommandInteraction, ICommand } from '../types';
 import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
-import { t } from '@yt-bot/i18n';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { injectable } from 'tsyringe';
 import { LANG } from '../langpacks';
 import { QueueService } from '../services';
+import { SlashCommandBuilder } from 'discord.js';
 import { YouTubeService } from '../services/YouTubeService';
-import { ICommand } from '../types/ICommand';
+import { injectable } from 'tsyringe';
+import { t } from '@yt-bot/i18n';
 
 const COMMAND = LANG.COMMANDS.ENQUEUE;
 
@@ -35,7 +35,7 @@ export class Enqueue implements ICommand {
 				.setRequired(false)
 		);
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: CommandInteraction) {
 		try {
 			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
 			const [{ video_details: videoDetails }] = await this.youtubeService.getVideoInfos(resource);

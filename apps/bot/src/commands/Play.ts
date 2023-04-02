@@ -1,10 +1,10 @@
-import { ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
-import { injectable } from 'tsyringe';
-import { LANG } from '../langpacks';
+import type { CommandInteraction, ICommand } from '../types';
+import { type ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { QueueService, VoiceService } from '../services';
+import { LANG } from '../langpacks';
+import { SlashCommandBuilder } from 'discord.js';
 import { YouTubeService } from '../services/YouTubeService';
-import { ICommand } from '../types/ICommand';
+import { injectable } from 'tsyringe';
 
 const COMMAND = LANG.COMMANDS.PLAY;
 
@@ -29,7 +29,7 @@ export class Play implements ICommand {
 		)
 		.setDMPermission(false);
 
-	async execute(interaction: ChatInputCommandInteraction<'cached'>) {
+	async execute(interaction: CommandInteraction) {
 		try {
 			const commandAuthor = interaction.member;
 			const commandAuthorVoiceChannel = commandAuthor.voice.channel;

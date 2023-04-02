@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import playdl from 'play-dl';
-import { container } from 'tsyringe';
 import { YouTubeService } from './YouTubeService';
+import { container } from 'tsyringe';
+import playdl from 'play-dl';
 
 const youtubeService = container.resolve(YouTubeService);
 

@@ -1,7 +1,7 @@
+import { CommandService } from '.';
+import type { ICommand } from '../types/ICommand';
 import { SlashCommandBuilder } from 'discord.js';
 import { container } from 'tsyringe';
-import { CommandService } from '.';
-import { ICommand } from '../types/ICommand';
 
 const commandService = container.resolve(CommandService);
 

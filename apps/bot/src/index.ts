@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
+import { BotService, CommandService, ShardManagerService } from './services';
 import { DISCORD_TOKEN } from '@yt-bot/env';
 import { container } from 'tsyringe';
-import { BotService, CommandService, ShardManagerService } from './services';
 
 /**
  * Entry to the app.

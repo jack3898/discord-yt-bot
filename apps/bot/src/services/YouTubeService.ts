@@ -1,4 +1,4 @@
-import { AudioResource, createAudioResource } from '@discordjs/voice';
+import { type AudioResource, createAudioResource } from '@discordjs/voice';
 import { stream as startStream, video_basic_info as videoBasicInfo, yt_validate as ytValidate } from 'play-dl';
 import { singleton } from 'tsyringe';
 

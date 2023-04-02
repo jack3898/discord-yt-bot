@@ -1,4 +1,5 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import type { CommandInteraction } from './CommandInteraction';
+import type { SlashCommandBuilder } from 'discord.js';
 
 export interface ICommand {
 	/**
@@ -9,5 +10,5 @@ export interface ICommand {
 	/**
 	 * The executor function that runs when a user invokes the slash command.
 	 */
-	execute: (interaction: ChatInputCommandInteraction<'cached'>) => void;
+	execute: (interaction: CommandInteraction) => void;
 }

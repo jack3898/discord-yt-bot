@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { SHARD_MANAGER_URL } from '@yt-bot/env';
-import { ClientToServerEvents, ServerToClientEvents } from '@yt-bot/shard-manager/types/socket';
-import { Routes } from 'discord.js';
-import { io, Socket } from 'socket.io-client';
-import { singleton } from 'tsyringe';
+import type { ClientToServerEvents, ServerToClientEvents } from '@yt-bot/shard-manager/types/socket';
+import { type Socket, io } from 'socket.io-client';
 import { RestService } from './RestService';
+import { Routes } from 'discord.js';
+import { SHARD_MANAGER_URL } from '@yt-bot/env';
+import { singleton } from 'tsyringe';
 
 /**
  * When running multiple bot processes, a shard manager is required to assign each process a shard id.

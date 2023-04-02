@@ -1,5 +1,5 @@
 import { ENV } from '@yt-bot/constants';
-import { Configuration as WebpackConfig } from 'webpack';
+import type { Configuration as WebpackConfig } from 'webpack';
 
 const isLocal = /^(@yt-bot|\.\/|\.\.)/;
 

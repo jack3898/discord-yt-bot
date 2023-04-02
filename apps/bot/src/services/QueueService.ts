@@ -1,6 +1,6 @@
-import { ConstantsTypes } from '@yt-bot/constants';
-import { singleton } from 'tsyringe';
+import type { ConstantsTypes } from '@yt-bot/constants';
 import { DatabaseService } from './DatabaseService';
+import { singleton } from 'tsyringe';
 
 @singleton()
 export class QueueService {

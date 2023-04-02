@@ -1,6 +1,6 @@
-import { container, InjectionToken, singleton } from 'tsyringe';
-import { constructor } from 'tsyringe/dist/typings/types';
-import { ICommand } from '../types/ICommand';
+import { type InjectionToken, container, singleton } from 'tsyringe';
+import type { ICommand } from '../types/ICommand';
+import type { constructor } from 'tsyringe/dist/typings/types';
 
 /**
  * The command service ties up the commands in the commands directory.

@@ -1,7 +1,12 @@
+import type {
+	ClientToServerEvents as C2S,
+	InterServerEvents,
+	ServerToClientEvents as S2C,
+	SocketData
+} from '../types/socket';
 import { SHARDS, SHARD_MANAGER_URL } from '@yt-bot/env';
-import { Server } from 'socket.io';
-import { ClientToServerEvents as C2S, InterServerEvents, ServerToClientEvents as S2C, SocketData } from '../types/socket';
 import { AllocationManager } from './AllocationManager';
+import { Server } from 'socket.io';
 
 if (!SHARD_MANAGER_URL || !SHARDS) {
 	console.log('🟨 SHARD_MANAGER_URL or SHARDS env vars not in environment. Exiting...');

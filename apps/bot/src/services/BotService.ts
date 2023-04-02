@@ -1,10 +1,10 @@
-import { generateFormatters } from '@yt-bot/i18n';
-import { Client, GatewayIntentBits, RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
-import { singleton } from 'tsyringe';
-import { LANG } from '../langpacks';
+import { Client, GatewayIntentBits, type RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
 import { CommandService } from './CommandService';
+import { LANG } from '../langpacks';
 import { RestService } from './RestService';
 import { ShardManagerService } from './ShardManagerService';
+import { generateFormatters } from '@yt-bot/i18n';
+import { singleton } from 'tsyringe';
 
 /**
  * The bot service is a minor extension to the base Discord.Client class.

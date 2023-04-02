@@ -1,14 +1,14 @@
 import {
-	AudioPlayer,
+	type AudioPlayer,
 	AudioPlayerStatus,
 	AudioResource,
+	type VoiceConnection,
+	VoiceConnectionStatus,
 	createAudioPlayer,
-	joinVoiceChannel,
-	VoiceConnection,
-	VoiceConnectionStatus
+	joinVoiceChannel
 } from '@discordjs/voice';
-import { ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
-import { Guild, VoiceBasedChannel } from 'discord.js';
+import { type ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import type { Guild, VoiceBasedChannel } from 'discord.js';
 import { injectable } from 'tsyringe';
 
 @injectable()
