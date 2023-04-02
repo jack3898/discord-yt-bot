@@ -1,10 +1,11 @@
-import { Client, GatewayIntentBits, type RESTPostAPIChatInputApplicationCommandsJSONBody } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
+import { container, singleton } from 'tsyringe';
 import { CommandService } from './CommandService';
+import type { IEvent } from '../types';
 import { LANG } from '../langpacks';
 import { RestService } from './RestService';
 import { ShardManagerService } from './ShardManagerService';
 import { generateFormatters } from '@yt-bot/i18n';
-import { singleton } from 'tsyringe';
 
 /**
  * The bot service is a minor extension to the base Discord.Client class.
@@ -32,17 +33,17 @@ export class BotService extends Client {
 	/**
 	 * Registers required event listeners for various bot events.
 	 */
-	registerEvents() {
-		this.once('ready', () => {
-			console.log(`🟩 Bot logged in as ${this.user?.username}.`);
-		});
+	async registerClientEvents() {
+		const importedEvents = await import('../events');
+		const events = { ...importedEvents };
 
-		// Command interactions
-		this.on('interactionCreate', (interaction) => {
-			if (!interaction.isChatInputCommand() || !interaction.inCachedGuild()) return;
+		for (const event of Object.values(events)) {
+			const instance = container.resolve<IEvent<never>>(event);
 
-			this.commandService.getCommandInstanceBySlashCommandName(interaction.commandName)?.execute(interaction);
-		});
+			this.on(instance.name, instance.execute);
+
+			console.info(`🟩 Event "${instance.name}" (${instance.description.toLocaleLowerCase()}) loaded.`);
+		}
 	}
 
 	/**
@@ -54,23 +55,9 @@ export class BotService extends Client {
 		const commands = { ...importedCommands };
 
 		for (const commandToken of Object.values(commands)) {
-			this.commandService.registerClassToken(commandToken);
-		}
-	}
+			const instance = this.commandService.registerClassToken(commandToken);
 
-	/**
-	 * Publishes commands from the CommandService to the Discord API for use as slash commands.
-	 */
-	async registerSlashCommands(commands: RESTPostAPIChatInputApplicationCommandsJSONBody[]) {
-		try {
-			await this.restService.put(this.restService.commandsRoute, { body: commands });
-
-			console.log('🟩 Slash commands registered to the Discord API.');
-		} catch (error: unknown) {
-			console.error('🟥 Failed to register slash commands.');
-
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			throw new Error(error as any);
+			console.log(`🟩 Command "${instance.definition.name}" loaded.`);
 		}
 	}
 }

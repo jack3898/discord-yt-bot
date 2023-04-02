@@ -21,17 +21,16 @@ async function main() {
 
 	const bot = container.resolve(BotService);
 
-	// console.log(allocation);
 	bot.login(DISCORD_TOKEN);
 
 	// Global bot event listeners
-	bot.registerEvents();
+	await bot.registerClientEvents();
 
 	// Idenfity all commands in the commands directory
 	await bot.registerInternalCommands();
 
 	// Publish slash commands to the Discord API. Must come after internal slash command registrations
-	await bot.registerSlashCommands(commandService.getCommandBuildersAsJson());
+	await commandService.publishSlashCommands(commandService.getCommandBuildersAsJson());
 }
 
 main();

@@ -1,9 +1,8 @@
-import { CommandService } from '.';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { CommandService, RestService } from '.';
 import type { ICommand } from '../types/ICommand';
 import { SlashCommandBuilder } from 'discord.js';
 import { container } from 'tsyringe';
-
-const commandService = container.resolve(CommandService);
 
 const nameSpy = jest.fn();
 
@@ -19,14 +18,12 @@ class MockClass implements ICommand {
 	}
 }
 
-afterEach(() => {
-	jest.resetAllMocks();
-});
-
 it('should register class tokens and retrieve them', () => {
+	const commandService = container.resolve(CommandService);
+
 	commandService.registerClassToken(MockClass);
 
-	expect(nameSpy).toHaveBeenCalledTimes(2); // One to save it and the other for the console log
+	expect(nameSpy).toHaveBeenCalledTimes(1);
 
 	const foundInstance = commandService.getCommandInstanceBySlashCommandName('testcommand');
 
@@ -34,6 +31,8 @@ it('should register class tokens and retrieve them', () => {
 });
 
 it('should retrieve all slash command builders', () => {
+	const commandService = container.resolve(CommandService);
+
 	commandService.registerClassToken(MockClass);
 
 	const builders = commandService.getCommandBuilders();
@@ -42,10 +41,40 @@ it('should retrieve all slash command builders', () => {
 });
 
 it('should retrieve all slash command builders as an array of RESTPostAPIChatInputApplicationCommandsJSONBody', () => {
+	const commandService = container.resolve(CommandService);
+
 	commandService.registerClassToken(MockClass);
 
 	const builders = commandService.getCommandBuildersAsJson();
 
 	expect(typeof builders[0].name).toBe('string');
 	expect(builders[0]).not.toBeInstanceOf(SlashCommandBuilder);
+});
+
+it('should publish slash commands', async () => {
+	const routeSpy = jest.fn();
+	const putSpy = jest.fn();
+
+	class MockRest {
+		get commandsRoute() {
+			routeSpy();
+
+			return 'route';
+		}
+
+		put() {
+			putSpy();
+
+			return Promise.resolve(true);
+		}
+	}
+
+	container.register(RestService, MockRest as any);
+
+	const commandService = container.resolve(CommandService);
+
+	await commandService.publishSlashCommands([]);
+
+	expect(putSpy).toHaveBeenCalledTimes(1);
+	expect(routeSpy).toHaveBeenCalledTimes(1);
 });
