@@ -18,10 +18,11 @@ model DiscordUser {
 }
 
 model DiscordGuild {
-  id      String   @id() // provided by Discord guild id
-  created DateTime @default(now())
-  updated DateTime @updatedAt()
-  Queue   Queue[]
+  id            String   @id() // provided by Discord guild id
+  created       DateTime @default(now())
+  updated       DateTime @updatedAt()
+  Queue         Queue[]
+  volumePercent Int      @default(80)
 }
 
 model Queue {
