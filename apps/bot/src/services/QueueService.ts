@@ -25,7 +25,7 @@ export class QueueService {
 		discordUserId: string,
 		discordGuildId?: string
 	) {
-		return this.dbService.queue.create({
+		return this.dbService.prisma.queue.create({
 			data: {
 				resource: {
 					connectOrCreate: {
@@ -59,7 +59,7 @@ export class QueueService {
 	}
 
 	async getItemsByCursor(cursor?: number, take = 1) {
-		const data = await this.dbService.queue.findMany({
+		const data = await this.dbService.prisma.queue.findMany({
 			cursor: { id: cursor },
 			take: take + 1
 		});
@@ -73,7 +73,7 @@ export class QueueService {
 	}
 
 	getQueue(userId: string, guildId?: string, expired?: boolean) {
-		return this.dbService.queue.findMany({
+		return this.dbService.prisma.queue.findMany({
 			// User queues must not have a guild id, but guild queues must have a user id.
 			where: { discordUserId: userId, discordGuildId: guildId ?? null, expired: !!expired },
 			select: { resource: { select: { resource: true } } },
@@ -82,7 +82,7 @@ export class QueueService {
 	}
 
 	getNextQueueItem(resourceType: ConstantsTypes.ResourceType, guildId: string, userId?: string) {
-		return this.dbService.queue.findFirst({
+		return this.dbService.prisma.queue.findFirst({
 			where: {
 				discordGuildId: userId ? null : guildId,
 				discordUserId: userId,
@@ -96,7 +96,7 @@ export class QueueService {
 	}
 
 	setExpired(queueItemId: number) {
-		return this.dbService.queue.update({
+		return this.dbService.prisma.queue.update({
 			where: { id: queueItemId },
 			data: { expired: true }
 		});

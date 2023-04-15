@@ -26,7 +26,7 @@ export class Myqueue implements ICommand {
 
 		const queue = await this.queueService.getQueue(interaction.user.id);
 
-		const count = await this.dbService.queue.count({
+		const count = await this.dbService.prisma.queue.count({
 			where: { discordUserId: userId }
 		});
 
