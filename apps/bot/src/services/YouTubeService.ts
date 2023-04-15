@@ -31,7 +31,7 @@ export class YouTubeService {
 				discordPlayerCompatibility: true
 			});
 
-			return createAudioResource(stream);
+			return createAudioResource(stream, { inlineVolume: true });
 		} catch (error) {
 			console.error('Failed to create stream.\n', error);
 

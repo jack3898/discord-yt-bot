@@ -9,19 +9,25 @@ import {
 } from '@discordjs/voice';
 import { type ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import type { Guild, VoiceBasedChannel } from 'discord.js';
+import { DatabaseService } from './DatabaseService';
+import type { Percent } from '../types';
 import { injectable } from 'tsyringe';
 
 @injectable()
 export class VoiceService {
+	constructor(private dbService: DatabaseService) {}
+
 	static voiceConnections = new Map<Guild['id'], VoiceConnection>();
 
 	static audioPlayers = new Map<Guild['id'], AudioPlayer>();
 
+	static audioResources = new Map<Guild['id'], AudioResource>();
+
 	/**
 	 * Get an audio player that has at least one subscribed connection
 	 */
-	getActiveAudioPlayer(guildId: Guild['id']): AudioPlayer | undefined {
-		const currentAudioPlayer = VoiceService.audioPlayers.get(guildId);
+	getActiveAudioPlayer(guild: Guild): AudioPlayer | undefined {
+		const currentAudioPlayer = VoiceService.audioPlayers.get(guild.id);
 
 		if (currentAudioPlayer?.playable.length) {
 			return currentAudioPlayer;
@@ -74,6 +80,35 @@ export class VoiceService {
 	}
 
 	/**
+	 * Gets the volume, but if provided a setPercent will set the volume for the guild and return that instead.
+	 *
+	 * Performs an access to the database and upserts the guild if one does not exist.
+	 */
+	async guildVolume<T extends Percent>(guild: Guild, setPercent?: T): Promise<T> {
+		const volumePercent = await this.dbService.prisma.discordGuild.update({
+			where: { id: guild.id },
+			data: { volumePercent: setPercent as number }
+		});
+
+		return volumePercent.volumePercent as T;
+	}
+
+	/**
+	 * Sets the volume of the last created audio resource.
+	 */
+	setAudioResourceVolume(guild: Guild, setPercent: Percent): boolean {
+		const audioResourceVolumeProperty = VoiceService.audioResources.get(guild.id)?.volume;
+
+		if (audioResourceVolumeProperty) {
+			audioResourceVolumeProperty.setVolumeLogarithmic(setPercent / 100);
+
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Create and cache the audio player.
 	 */
 	createAudioPlayer(guild: Guild, voiceConnectionToSubscribe: VoiceConnection): AudioPlayer {
@@ -87,6 +122,14 @@ export class VoiceService {
 		voiceConnectionToSubscribe.subscribe(audioPlayer);
 
 		return audioPlayer;
+	}
+
+	getAudioResource(guild: Guild): AudioResource | undefined {
+		return VoiceService.audioResources.get(guild.id);
+	}
+
+	setAudioResource(guild: Guild, audioResource: AudioResource): void {
+		VoiceService.audioResources.set(guild.id, audioResource);
 	}
 
 	/**
@@ -112,10 +155,14 @@ export class VoiceService {
 			return null;
 		}
 
+		const volume = await this.guildVolume(guild);
 		const voiceConnection = this.createVoiceConnection(guild, voiceBasedChannel);
 		const audioPlayer = this.createAudioPlayer(guild, voiceConnection);
 
 		audioPlayer.play(resolveAudioResourceResult);
+
+		this.setAudioResource(guild, resolveAudioResourceResult);
+		this.setAudioResourceVolume(guild, volume);
 
 		const onVoiceIdleFn = async (): Promise<void> => {
 			if (disconnectOnFirstIdle) {
@@ -138,7 +185,11 @@ export class VoiceService {
 				return onVoiceIdleFn();
 			}
 
-			this.getActiveAudioPlayer(guild.id)?.play(resolveAudioResourceOnIdleResult);
+			const volume = await this.guildVolume(guild);
+
+			this.getActiveAudioPlayer(guild)?.play(resolveAudioResourceOnIdleResult);
+			this.setAudioResource(guild, resolveAudioResourceOnIdleResult);
+			this.setAudioResourceVolume(guild, volume);
 		};
 
 		this.onVoiceIdle(audioPlayer, onVoiceIdleFn);

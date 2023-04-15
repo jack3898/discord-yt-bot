@@ -13,6 +13,7 @@ import EventEmitter from 'events';
 import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { VoiceService } from './VoiceService';
 import { container } from 'tsyringe';
+import { deepMockedPrismaClient } from '@yt-bot/database';
 
 jest.mock('@discordjs/voice', () => ({
 	...jest.requireActual('@discordjs/voice'),
@@ -24,6 +25,7 @@ jest.mock('@discordjs/voice', () => ({
 const joinVoiceChannelMock = jest.mocked(joinVoiceChannel);
 const createAudioPlayerMock = jest.mocked(createAudioPlayer);
 const AudioResourceMock = AudioResource as any;
+let voiceService: VoiceService;
 
 let joinVoiceChannelMockReturn: {
 	__mockId: 'mock 1';
@@ -43,8 +45,10 @@ let createAudioPlayerMockReturn: {
 };
 
 beforeEach(() => {
+	voiceService = container.resolve(VoiceService);
 	VoiceService.voiceConnections = new Map();
 	VoiceService.audioPlayers = new Map();
+	VoiceService.audioResources = new Map();
 
 	joinVoiceChannelMockReturn = {
 		__mockId: 'mock 1',
@@ -63,6 +67,10 @@ beforeEach(() => {
 		play: jest.fn()
 	};
 
+	deepMockedPrismaClient.discordGuild.update.mockResolvedValue({
+		volumePercent: 80
+	} as any);
+
 	joinVoiceChannelMock.mockReturnValue(joinVoiceChannelMockReturn as unknown as VoiceConnection);
 
 	createAudioPlayerMock.mockReturnValue(createAudioPlayerMockReturn as unknown as AudioPlayer);
@@ -72,7 +80,7 @@ describe('getActiveAudioPlayer', () => {
 	it('should return undefined if an audio player does not exist in the cache', () => {
 		const voiceService = container.resolve(VoiceService);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(undefined);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
 
 	it('should return an audio player', () => {
@@ -82,7 +90,7 @@ describe('getActiveAudioPlayer', () => {
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(audioPlayerMock);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(audioPlayerMock);
 	});
 
 	it('should NOT return an audio player if the amount of subscribed connections is 0', () => {
@@ -92,7 +100,7 @@ describe('getActiveAudioPlayer', () => {
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(undefined);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
 });
 
@@ -301,11 +309,8 @@ describe('startVoiceSession', () => {
 	let createVoiceConnectionSpy: any;
 	let createAudioPlayerSpy: any;
 	let audioPlayerMock: any;
-	let voiceService: VoiceService;
 
 	beforeEach(() => {
-		voiceService = container.resolve(VoiceService);
-
 		audioPlayerMock = new (class AudioPlayerMock extends EventEmitter {
 			play = jest.fn();
 		})();
@@ -365,5 +370,72 @@ describe('startVoiceSession', () => {
 		});
 
 		expect(onVoiceIdleSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('should set the audio resource volume as soon as possible', async () => {
+		const setVolumeSpy = jest.spyOn(voiceService, 'setAudioResourceVolume');
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			resolveAudioResource: async () => {
+				return new AudioResourceMock();
+			}
+		});
+
+		expect(setVolumeSpy).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('guildVolume', () => {
+	it('should return the volume from the database', async () => {
+		const result = await voiceService.guildVolume({ id: 'guild id' } as Guild);
+
+		expect(result).toBe(80);
+	});
+
+	it('should scope volume controls to the guild', async () => {
+		await voiceService.guildVolume({ id: 'guild id' } as Guild);
+
+		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
+			expect.objectContaining({ where: { id: 'guild id' } })
+		);
+	});
+
+	it('should pass undefined through as data to not update the volume when omitted', async () => {
+		await voiceService.guildVolume({ id: 'guild id' } as Guild);
+
+		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
+			expect.objectContaining({ data: { volumePercent: undefined } })
+		);
+	});
+
+	it('should pass a new volume number through when provided', async () => {
+		await voiceService.guildVolume({ id: 'guild id' } as Guild, 50);
+
+		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
+			expect.objectContaining({ data: { volumePercent: 50 } })
+		);
+	});
+});
+
+describe('setAudioResourceVolume', () => {
+	it('should set the volume on a cached audio resource and return true', () => {
+		const setVolumeSpy = jest.fn();
+
+		VoiceService.audioResources.set('guild id', {
+			volume: { setVolumeLogarithmic: setVolumeSpy }
+		} as any);
+
+		const result = voiceService.setAudioResourceVolume({ id: 'guild id' } as Guild, 50);
+
+		expect(setVolumeSpy).toHaveBeenCalledWith(0.5);
+		expect(result).toBeTruthy();
+	});
+
+	it('should return false when it cannot find a cached audio resource', () => {
+		const result = voiceService.setAudioResourceVolume({ id: 'guild id' } as Guild, 50);
+
+		expect(result).toBeFalsy();
 	});
 });

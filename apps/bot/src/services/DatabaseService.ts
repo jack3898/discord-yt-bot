@@ -1,4 +1,4 @@
-import { type DiscordGuild, type DiscordUser, PrismaClient } from '@yt-bot/database';
+import { type PrismaClient, prismaClient } from '@yt-bot/database';
 import type { ConstantsTypes } from '@yt-bot/constants';
 import { singleton } from 'tsyringe';
 
@@ -7,18 +7,16 @@ import { singleton } from 'tsyringe';
  * You can learn more about Prisma here: https://www.prisma.io/
  */
 @singleton()
-export class DatabaseService extends PrismaClient {
+export class DatabaseService {
 	constructor() {
-		super();
-
+		this.prisma = prismaClient;
 		this.initLogging();
 	}
 
-	private userIdCache = new Map<string, DiscordUser>();
-	private guildIdCache = new Map<string, DiscordGuild>();
+	readonly prisma: PrismaClient;
 
 	createResourceIfNotExists(resource: string, type: ConstantsTypes.ResourceType) {
-		return this.resource.upsert({
+		return this.prisma.resource.upsert({
 			where: {
 				resource: resource
 			},
@@ -31,7 +29,7 @@ export class DatabaseService extends PrismaClient {
 	}
 
 	initLogging() {
-		this.$use(async (params, next) => {
+		this.prisma.$use(async (params, next) => {
 			const before = Date.now();
 
 			const result = await next(params);
