@@ -30,5 +30,7 @@
         "@yt-bot/config-ts": "*",
         "@yt-bot/eslint-config-yt-bot": "*"
     },
-    "peerDependencies": {}
+    "peerDependencies": {
+        "jest-mock-extended": "^3.0.4"
+    }
 }

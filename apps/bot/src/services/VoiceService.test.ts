@@ -13,6 +13,7 @@ import EventEmitter from 'events';
 import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { VoiceService } from './VoiceService';
 import { container } from 'tsyringe';
+import { deepMockedPrismaClient } from '@yt-bot/database';
 
 jest.mock('@discordjs/voice', () => ({
 	...jest.requireActual('@discordjs/voice'),
@@ -72,7 +73,7 @@ describe('getActiveAudioPlayer', () => {
 	it('should return undefined if an audio player does not exist in the cache', () => {
 		const voiceService = container.resolve(VoiceService);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(undefined);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
 
 	it('should return an audio player', () => {
@@ -82,7 +83,7 @@ describe('getActiveAudioPlayer', () => {
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(audioPlayerMock);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(audioPlayerMock);
 	});
 
 	it('should NOT return an audio player if the amount of subscribed connections is 0', () => {
@@ -92,7 +93,7 @@ describe('getActiveAudioPlayer', () => {
 
 		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
-		expect(voiceService.getActiveAudioPlayer('guild id')).toStrictEqual(undefined);
+		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
 });
 
@@ -329,6 +330,10 @@ describe('startVoiceSession', () => {
 	});
 
 	it('should establish a connection and an audio player when the audio resource can be found', async () => {
+		deepMockedPrismaClient.discordGuild.update.mockResolvedValue({
+			volumePercent: 80
+		} as any);
+
 		await voiceService.startVoiceSession({
 			guild: guildMock,
 			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
@@ -354,6 +359,10 @@ describe('startVoiceSession', () => {
 	});
 
 	it('should use onVoiceIdle method', async () => {
+		deepMockedPrismaClient.discordGuild.update.mockResolvedValue({
+			volumePercent: 80
+		} as any);
+
 		const onVoiceIdleSpy = jest.spyOn(voiceService, 'onVoiceIdle');
 
 		await voiceService.startVoiceSession({
