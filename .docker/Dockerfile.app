@@ -17,8 +17,6 @@ COPY --from=pruner --chown=node /home/node/__build/pruned .
 
 USER node
 
-RUN yarn install
-
 ARG port
 
 EXPOSE ${port}
@@ -26,5 +24,8 @@ EXPOSE ${port}
 ARG scope
 
 ENV SCOPE ${scope}
+
+RUN yarn run init
+RUN yarn run db:seed
 
 CMD ["yarn", "run", "start"]
