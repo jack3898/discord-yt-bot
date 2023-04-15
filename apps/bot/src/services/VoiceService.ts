@@ -85,9 +85,10 @@ export class VoiceService {
 	 * Performs an access to the database and upserts the guild if one does not exist.
 	 */
 	async guildVolume<T extends Percent>(guild: Guild, setPercent?: T): Promise<T> {
-		const volumePercent = await this.dbService.prisma.discordGuild.update({
+		const volumePercent = await this.dbService.prisma.discordGuild.upsert({
 			where: { id: guild.id },
-			data: { volumePercent: setPercent as number }
+			update: { volumePercent: setPercent as number },
+			create: { id: guild.id, volumePercent: 80 }
 		});
 
 		return volumePercent.volumePercent as T;

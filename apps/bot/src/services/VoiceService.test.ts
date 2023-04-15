@@ -67,7 +67,7 @@ beforeEach(() => {
 		play: jest.fn()
 	};
 
-	deepMockedPrismaClient.discordGuild.update.mockResolvedValue({
+	deepMockedPrismaClient.discordGuild.upsert.mockResolvedValue({
 		volumePercent: 80
 	} as any);
 
@@ -397,7 +397,7 @@ describe('guildVolume', () => {
 	it('should scope volume controls to the guild', async () => {
 		await voiceService.guildVolume({ id: 'guild id' } as Guild);
 
-		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
+		expect(deepMockedPrismaClient.discordGuild.upsert).toHaveBeenCalledWith(
 			expect.objectContaining({ where: { id: 'guild id' } })
 		);
 	});
@@ -405,16 +405,24 @@ describe('guildVolume', () => {
 	it('should pass undefined through as data to not update the volume when omitted', async () => {
 		await voiceService.guildVolume({ id: 'guild id' } as Guild);
 
-		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
-			expect.objectContaining({ data: { volumePercent: undefined } })
+		expect(deepMockedPrismaClient.discordGuild.upsert).toHaveBeenCalledWith(
+			expect.objectContaining({ update: { volumePercent: undefined } })
 		);
 	});
 
 	it('should pass a new volume number through when provided', async () => {
 		await voiceService.guildVolume({ id: 'guild id' } as Guild, 50);
 
-		expect(deepMockedPrismaClient.discordGuild.update).toHaveBeenCalledWith(
-			expect.objectContaining({ data: { volumePercent: 50 } })
+		expect(deepMockedPrismaClient.discordGuild.upsert).toHaveBeenCalledWith(
+			expect.objectContaining({ update: { volumePercent: 50 } })
+		);
+	});
+
+	it('should initialise a new guild if one does not exist in the db', async () => {
+		await voiceService.guildVolume({ id: 'guild id' } as Guild);
+
+		expect(deepMockedPrismaClient.discordGuild.upsert).toHaveBeenCalledWith(
+			expect.objectContaining({ create: { id: 'guild id', volumePercent: 80 } })
 		);
 	});
 });
