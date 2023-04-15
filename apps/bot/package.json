@@ -7,6 +7,7 @@
         "dev": "nodemon --watch src --exec \"node --inspect=0.0.0.0:9229 --require ts-node/register\" src/index.ts",
         "build": "ts-node app.build.ts",
         "start": "node dist/app.js",
+        "start:daemon": "pm2 start dist/app.js",
         "lint": "eslint **/*.ts",
         "test": "jest"
     },

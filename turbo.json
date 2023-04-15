@@ -5,6 +5,7 @@
         "test": { "cache": false },
         "build": { "cache": false },
         "start": { "cache": false },
+        "start:daemon": { "cache": false },
         "prune": { "cache": false },
         "db-push": { "cache": false },
         "db-studio": { "cache": false },
