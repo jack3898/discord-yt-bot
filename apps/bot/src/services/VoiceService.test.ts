@@ -2,6 +2,7 @@
 import {
 	type AudioPlayer,
 	AudioPlayerStatus,
+	type AudioResource,
 	type VoiceConnection,
 	VoiceConnectionStatus,
 	createAudioPlayer,
@@ -271,7 +272,121 @@ describe('createAudioPlayer', () => {
 });
 
 describe('startVoiceSession', () => {
-	// TODO: needs re-testing!
+	const guildMock = {
+		id: 'guild id'
+	} as unknown as Guild;
+
+	let audioPlayerMock: any;
+	let createAudioPlayerSpy: any;
+
+	beforeEach(() => {
+		audioPlayerMock = new (class AudioPlayerMock extends EventEmitter {
+			play = jest.fn();
+		})();
+
+		createAudioPlayerSpy = jest.spyOn(voiceService, 'createAudioPlayer').mockReturnValue(audioPlayerMock as any);
+	});
+
+	it('should create a new audio player', async () => {
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			// eslint-disable-next-line @typescript-eslint/no-empty-function
+			nextAudioResourceResolver: async function* () {}
+		});
+
+		expect(createAudioPlayerSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('should return the first yielded result of the generator instance', async () => {
+		const yieldSpy = jest.fn().mockReturnValue(true);
+
+		const result = await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				yield yieldSpy();
+			}
+		});
+
+		expect(yieldSpy).toHaveBeenCalledTimes(1);
+		expect(result).toBe(true);
+	});
+
+	it('should run the resource resolver on voice idle', async () => {
+		const yieldSpy = jest.fn();
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yieldSpy();
+
+					yield {} as AudioResource;
+				}
+			}
+		});
+
+		expect(yieldSpy).toHaveBeenCalledTimes(1);
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(yieldSpy).toHaveBeenCalledTimes(3);
+	});
+
+	it('should add the audio resource to the cache', async () => {
+		const yieldSpy = jest
+			.fn()
+			.mockReturnValueOnce('audio resource 1' as any)
+			.mockReturnValueOnce('audio resource 2' as any);
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yield yieldSpy();
+				}
+			}
+		});
+
+		expect(voiceService.audioResources.get('guild id')).toBe('audio resource 1');
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(voiceService.audioResources.get('guild id')).toBe('audio resource 2');
+	});
+
+	it('should set the volume of the next audio resource to a value defined in the database', async () => {
+		const guildVolumeSpy = jest.spyOn(voiceService, 'guildVolume').mockResolvedValueOnce(70).mockResolvedValueOnce(50);
+		const setAudioResourceVolumeSpy = jest.spyOn(voiceService, 'setAudioResourceVolume');
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yield {} as AudioResource;
+				}
+			}
+		});
+
+		expect(guildVolumeSpy).toHaveBeenCalledTimes(1);
+		expect(setAudioResourceVolumeSpy).toHaveBeenCalledWith({ id: 'guild id' }, 70);
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(guildVolumeSpy).toHaveBeenCalledTimes(2);
+		expect(setAudioResourceVolumeSpy).toHaveBeenCalledWith({ id: 'guild id' }, 50);
+	});
 });
 
 describe('guildVolume', () => {
