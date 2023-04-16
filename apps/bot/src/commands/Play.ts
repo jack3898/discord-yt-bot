@@ -1,5 +1,5 @@
 import type { CommandInteraction, ICommand } from '../types';
-import { type ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
+import { type ConstantsTypes, ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { QueueService, VoiceService } from '../services';
 import { LANG } from '../langpacks';
 import { SlashCommandBuilder } from 'discord.js';
@@ -55,38 +55,39 @@ export class Play implements ICommand {
 			const startVoiceSessionResult = await this.voiceService.startVoiceSession({
 				guild: interaction.guild,
 				voiceBasedChannel: commandAuthorVoiceChannel,
-				disconnectOnFirstIdle: false,
-				resolveAudioResource: async () => {
-					const nextItem = await this.queueService.getNextQueueItem(
-						RESOURCE_TYPES.YOUTUBE_VIDEO,
-						interaction.guild.id,
-						playAction === ENTITY_TYPES.USER ? interaction.member.id : undefined
-					);
+				nextAudioResourceResolver: async function* (this: Play) {
+					while (true) {
+						const nextItem = await this.queueService.getNextQueueItem(
+							RESOURCE_TYPES.YOUTUBE_VIDEO,
+							interaction.guild.id,
+							playAction === ENTITY_TYPES.USER ? interaction.member.id : undefined
+						);
 
-					if (nextItem) {
-						await this.queueService.setExpired(nextItem.id);
+						if (nextItem) {
+							await this.queueService.setExpired(nextItem.id);
+						}
+
+						const resource = nextItem?.resource.resource;
+
+						if (!resource) {
+							return;
+						}
+
+						const [url] = this.youtubeService.getVideoUrls(resource);
+
+						if (!url) {
+							return;
+						}
+
+						const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
+
+						if (!audioResource) {
+							return;
+						}
+
+						yield audioResource;
 					}
-
-					const resource = nextItem?.resource.resource || null;
-
-					if (!resource) {
-						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-					}
-
-					const [url] = this.youtubeService.getVideoUrls(resource);
-
-					if (!url) {
-						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-					}
-
-					const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
-
-					if (!audioResource) {
-						return VOICE_CONNECTION_SIGNALS.COMPLETE;
-					}
-
-					return audioResource;
-				}
+				}.bind(this)
 			});
 
 			if (startVoiceSessionResult) {

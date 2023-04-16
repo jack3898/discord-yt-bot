@@ -3,7 +3,6 @@ import { type ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } f
 import type { ICommand } from '../types/ICommand';
 import { LANG } from '../langpacks';
 import type { InfoData as PlaydlInfoData } from 'play-dl';
-import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { injectable } from 'tsyringe';
 import { t } from '@yt-bot/i18n';
 
@@ -49,23 +48,22 @@ export class Quickplay implements ICommand {
 			const startVoiceSessionResult = await this.voiceService.startVoiceSession({
 				guild: interaction.guild,
 				voiceBasedChannel: commandAuthorVoiceChannel,
-				disconnectOnFirstIdle: true,
-				resolveAudioResource: async () => {
+				nextAudioResourceResolver: async function* (this: Quickplay) {
 					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
 					const [url] = this.youtubeService.getVideoUrls(resource);
 
 					if (!url) {
-						return VOICE_CONNECTION_SIGNALS.DISCONNECT;
+						return;
 					}
 
 					const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
 
 					if (!audioResource) {
-						return VOICE_CONNECTION_SIGNALS.COMPLETE;
+						return;
 					}
 
-					return audioResource;
-				}
+					yield audioResource;
+				}.bind(this)
 			});
 
 			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);

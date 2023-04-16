@@ -2,7 +2,7 @@
 import {
 	type AudioPlayer,
 	AudioPlayerStatus,
-	AudioResource,
+	type AudioResource,
 	type VoiceConnection,
 	VoiceConnectionStatus,
 	createAudioPlayer,
@@ -10,7 +10,6 @@ import {
 } from '@discordjs/voice';
 import type { Guild, VoiceBasedChannel } from 'discord.js';
 import EventEmitter from 'events';
-import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { VoiceService } from './VoiceService';
 import { container } from 'tsyringe';
 import { deepMockedPrismaClient } from '@yt-bot/database';
@@ -24,7 +23,6 @@ jest.mock('@discordjs/voice', () => ({
 
 const joinVoiceChannelMock = jest.mocked(joinVoiceChannel);
 const createAudioPlayerMock = jest.mocked(createAudioPlayer);
-const AudioResourceMock = AudioResource as any;
 let voiceService: VoiceService;
 
 let joinVoiceChannelMockReturn: {
@@ -46,9 +44,6 @@ let createAudioPlayerMockReturn: {
 
 beforeEach(() => {
 	voiceService = container.resolve(VoiceService);
-	VoiceService.voiceConnections = new Map();
-	VoiceService.audioPlayers = new Map();
-	VoiceService.audioResources = new Map();
 
 	joinVoiceChannelMockReturn = {
 		__mockId: 'mock 1',
@@ -78,27 +73,21 @@ beforeEach(() => {
 
 describe('getActiveAudioPlayer', () => {
 	it('should return undefined if an audio player does not exist in the cache', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
 
 	it('should return an audio player', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		const audioPlayerMock = { playable: { length: 1 } };
 
-		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
+		voiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
 		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(audioPlayerMock);
 	});
 
 	it('should NOT return an audio player if the amount of subscribed connections is 0', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		const audioPlayerMock = { playable: { length: 0 } };
 
-		VoiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
+		voiceService.audioPlayers.set('guild id', audioPlayerMock as unknown as AudioPlayer);
 
 		expect(voiceService.getActiveAudioPlayer({ id: 'guild id' } as Guild)).toStrictEqual(undefined);
 	});
@@ -106,8 +95,6 @@ describe('getActiveAudioPlayer', () => {
 
 describe('onVoiceIdle', () => {
 	it('should attach an event listener to the instance passed in', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		const eventSpy = {
 			on: jest.fn()
 		} as unknown as AudioPlayer;
@@ -118,7 +105,6 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should run the event listener callback function on voice idle', () => {
-		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -130,7 +116,6 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should NOT run the event listener callback when was not previous playing', () => {
-		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -142,7 +127,6 @@ describe('onVoiceIdle', () => {
 	});
 
 	it('should NOT run the event listener callback when new state is not idle', () => {
-		const voiceService = container.resolve(VoiceService);
 		const eventSpy = new EventEmitter() as unknown as AudioPlayer;
 		const callbackSpy = jest.fn();
 
@@ -156,13 +140,12 @@ describe('onVoiceIdle', () => {
 
 describe('destroyConnection', () => {
 	it('should destroy a connection that exists in the cache', () => {
-		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Ready },
 			destroy: jest.fn()
 		} as unknown as VoiceConnection;
 
-		VoiceService.voiceConnections.set('guild id', voiceConnectionMock);
+		voiceService.voiceConnections.set('guild id', voiceConnectionMock);
 
 		voiceService.destroyConnection('guild id');
 
@@ -170,13 +153,12 @@ describe('destroyConnection', () => {
 	});
 
 	it('should NOT destroy a connection that is already destroyed', () => {
-		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Destroyed },
 			destroy: jest.fn()
 		} as unknown as VoiceConnection;
 
-		VoiceService.voiceConnections.set('guild id', voiceConnectionMock);
+		voiceService.voiceConnections.set('guild id', voiceConnectionMock);
 
 		voiceService.destroyConnection('guild id');
 
@@ -184,7 +166,6 @@ describe('destroyConnection', () => {
 	});
 
 	it('should silently fail if the voice connection has not yet been cached', () => {
-		const voiceService = container.resolve(VoiceService);
 		const voiceConnectionMock = {
 			state: { status: VoiceConnectionStatus.Destroyed },
 			destroy: jest.fn()
@@ -198,7 +179,6 @@ describe('destroyConnection', () => {
 
 describe('createVoiceConnection', () => {
 	it('should destroy an existing connection first to prevent memory leaks', () => {
-		const voiceService = container.resolve(VoiceService);
 		const destroyConnectionSpy = jest.spyOn(voiceService, 'destroyConnection');
 
 		voiceService.createVoiceConnection({} as unknown as Guild, {} as unknown as VoiceBasedChannel);
@@ -207,8 +187,6 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should join the voice channel', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		const guildSpy = {
 			id: 'guild id',
 			voiceAdapterCreator: 'pretend I am a function'
@@ -228,8 +206,7 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should cache the voice connection', () => {
-		const voiceService = container.resolve(VoiceService);
-		const voiceConnectionsMapSetSpy = jest.spyOn(VoiceService.voiceConnections, 'set');
+		const voiceConnectionsMapSetSpy = jest.spyOn(voiceService.voiceConnections, 'set');
 
 		const guildSpy = {
 			id: 'guild id',
@@ -249,8 +226,6 @@ describe('createVoiceConnection', () => {
 	});
 
 	it('should return the voice connection', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		const guildSpy = {
 			id: 'guild id',
 			voiceAdapterCreator: 'pretend I am a function'
@@ -276,16 +251,13 @@ describe('createAudioPlayer', () => {
 	} as unknown as VoiceConnection;
 
 	it('should create an audio player', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
 
 		expect(createAudioPlayerMock).toHaveBeenCalledTimes(1);
 	});
 
 	it('should cache the audio player', () => {
-		const voiceService = container.resolve(VoiceService);
-		const audioPlayersMapSetSpy = jest.spyOn(VoiceService.audioPlayers, 'set');
+		const audioPlayersMapSetSpy = jest.spyOn(voiceService.audioPlayers, 'set');
 
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
 
@@ -293,8 +265,6 @@ describe('createAudioPlayer', () => {
 	});
 
 	it('should subscribe the audio player to the voice connection', () => {
-		const voiceService = container.resolve(VoiceService);
-
 		voiceService.createAudioPlayer(guildMock, voiceConnectionMock);
 
 		expect(voiceConnectionMock.subscribe).toHaveBeenCalledTimes(1);
@@ -306,84 +276,116 @@ describe('startVoiceSession', () => {
 		id: 'guild id'
 	} as unknown as Guild;
 
-	let createVoiceConnectionSpy: any;
-	let createAudioPlayerSpy: any;
 	let audioPlayerMock: any;
+	let createAudioPlayerSpy: any;
 
 	beforeEach(() => {
 		audioPlayerMock = new (class AudioPlayerMock extends EventEmitter {
 			play = jest.fn();
 		})();
 
-		createVoiceConnectionSpy = jest
-			.spyOn(voiceService, 'createVoiceConnection')
-			.mockReturnValue({ subscribe: jest.fn() } as any);
 		createAudioPlayerSpy = jest.spyOn(voiceService, 'createAudioPlayer').mockReturnValue(audioPlayerMock as any);
 	});
 
-	it('should return null if the audio resource resolver callback does not return an audio resource', () => {
-		const resultPromise = voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-			}
-		});
-
-		expect(resultPromise).resolves.toStrictEqual(null);
-	});
-
-	it('should establish a connection and an audio player when the audio resource can be found', async () => {
+	it('should create a new audio player', async () => {
 		await voiceService.startVoiceSession({
 			guild: guildMock,
 			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
-			}
+			// eslint-disable-next-line @typescript-eslint/no-empty-function
+			nextAudioResourceResolver: async function* () {}
 		});
 
-		expect(createVoiceConnectionSpy).toHaveBeenCalledTimes(1);
 		expect(createAudioPlayerSpy).toHaveBeenCalledTimes(1);
 	});
 
-	it('should use the resolveAudioResource callback to fetch the first audio resource', async () => {
-		const resolveAudioResourceSpy = jest.fn().mockResolvedValue({});
+	it('should return the first yielded result of the generator instance', async () => {
+		const yieldSpy = jest.fn().mockReturnValue(true);
 
-		await voiceService.startVoiceSession({
+		const result = await voiceService.startVoiceSession({
 			guild: guildMock,
 			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: resolveAudioResourceSpy
-		});
-
-		expect(resolveAudioResourceSpy).toHaveBeenCalledTimes(1);
-	});
-
-	it('should use onVoiceIdle method', async () => {
-		const onVoiceIdleSpy = jest.spyOn(voiceService, 'onVoiceIdle');
-
-		await voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
+			nextAudioResourceResolver: async function* () {
+				yield yieldSpy();
 			}
 		});
 
-		expect(onVoiceIdleSpy).toHaveBeenCalledTimes(1);
+		expect(yieldSpy).toHaveBeenCalledTimes(1);
+		expect(result).toBe(true);
 	});
 
-	it('should set the audio resource volume as soon as possible', async () => {
-		const setVolumeSpy = jest.spyOn(voiceService, 'setAudioResourceVolume');
+	it('should run the resource resolver on voice idle', async () => {
+		const yieldSpy = jest.fn();
 
 		await voiceService.startVoiceSession({
 			guild: guildMock,
 			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yieldSpy();
+
+					yield {} as AudioResource;
+				}
 			}
 		});
 
-		expect(setVolumeSpy).toHaveBeenCalledTimes(1);
+		expect(yieldSpy).toHaveBeenCalledTimes(1);
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(yieldSpy).toHaveBeenCalledTimes(3);
+	});
+
+	it('should add the audio resource to the cache', async () => {
+		const yieldSpy = jest
+			.fn()
+			.mockReturnValueOnce('audio resource 1' as any)
+			.mockReturnValueOnce('audio resource 2' as any);
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yield yieldSpy();
+				}
+			}
+		});
+
+		expect(voiceService.audioResources.get('guild id')).toBe('audio resource 1');
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(voiceService.audioResources.get('guild id')).toBe('audio resource 2');
+	});
+
+	it('should set the volume of the next audio resource to a value defined in the database', async () => {
+		const guildVolumeSpy = jest.spyOn(voiceService, 'guildVolume').mockResolvedValueOnce(70).mockResolvedValueOnce(50);
+		const setAudioResourceVolumeSpy = jest.spyOn(voiceService, 'setAudioResourceVolume');
+
+		await voiceService.startVoiceSession({
+			guild: guildMock,
+			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
+			nextAudioResourceResolver: async function* () {
+				while (true) {
+					yield {} as AudioResource;
+				}
+			}
+		});
+
+		expect(guildVolumeSpy).toHaveBeenCalledTimes(1);
+		expect(setAudioResourceVolumeSpy).toHaveBeenCalledWith({ id: 'guild id' }, 70);
+
+		audioPlayerMock.emit('stateChange', { status: AudioPlayerStatus.Playing }, { status: AudioPlayerStatus.Idle });
+
+		await new Promise((res) => setTimeout(res));
+
+		expect(guildVolumeSpy).toHaveBeenCalledTimes(2);
+		expect(setAudioResourceVolumeSpy).toHaveBeenCalledWith({ id: 'guild id' }, 50);
 	});
 });
 
@@ -431,7 +433,7 @@ describe('setAudioResourceVolume', () => {
 	it('should set the volume on a cached audio resource and return true', () => {
 		const setVolumeSpy = jest.fn();
 
-		VoiceService.audioResources.set('guild id', {
+		voiceService.audioResources.set('guild id', {
 			volume: { setVolumeLogarithmic: setVolumeSpy }
 		} as any);
 

@@ -1,33 +1,32 @@
 import {
 	type AudioPlayer,
 	AudioPlayerStatus,
-	AudioResource,
+	type AudioResource,
 	type VoiceConnection,
 	VoiceConnectionStatus,
 	createAudioPlayer,
 	joinVoiceChannel
 } from '@discordjs/voice';
-import { type ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import type { Guild, VoiceBasedChannel } from 'discord.js';
 import { DatabaseService } from './DatabaseService';
 import type { Percent } from '../types';
-import { injectable } from 'tsyringe';
+import { singleton } from 'tsyringe';
 
-@injectable()
+@singleton()
 export class VoiceService {
 	constructor(private dbService: DatabaseService) {}
 
-	static voiceConnections = new Map<Guild['id'], VoiceConnection>();
+	voiceConnections = new Map<Guild['id'], VoiceConnection>();
 
-	static audioPlayers = new Map<Guild['id'], AudioPlayer>();
+	audioPlayers = new Map<Guild['id'], AudioPlayer>();
 
-	static audioResources = new Map<Guild['id'], AudioResource>();
+	audioResources = new Map<Guild['id'], AudioResource>();
 
 	/**
 	 * Get an audio player that has at least one subscribed connection
 	 */
 	getActiveAudioPlayer(guild: Guild): AudioPlayer | undefined {
-		const currentAudioPlayer = VoiceService.audioPlayers.get(guild.id);
+		const currentAudioPlayer = this.audioPlayers.get(guild.id);
 
 		if (currentAudioPlayer?.playable.length) {
 			return currentAudioPlayer;
@@ -50,7 +49,7 @@ export class VoiceService {
 	 * Destroy a voice connection if it exists and is not already destroyed.
 	 */
 	destroyConnection(guildId: string) {
-		const potentialVoiceConnection = VoiceService.voiceConnections.get(guildId);
+		const potentialVoiceConnection = this.voiceConnections.get(guildId);
 
 		if (potentialVoiceConnection?.state.status !== VoiceConnectionStatus.Destroyed) {
 			potentialVoiceConnection?.destroy();
@@ -74,7 +73,7 @@ export class VoiceService {
 			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 		});
 
-		VoiceService.voiceConnections.set(guild.id, voiceConnection);
+		this.voiceConnections.set(guild.id, voiceConnection);
 
 		return voiceConnection;
 	}
@@ -98,7 +97,7 @@ export class VoiceService {
 	 * Sets the volume of the last created audio resource.
 	 */
 	setAudioResourceVolume(guild: Guild, setPercent: Percent): boolean {
-		const audioResourceVolumeProperty = VoiceService.audioResources.get(guild.id)?.volume;
+		const audioResourceVolumeProperty = this.audioResources.get(guild.id)?.volume;
 
 		if (audioResourceVolumeProperty) {
 			audioResourceVolumeProperty.setVolumeLogarithmic(setPercent / 100);
@@ -119,82 +118,62 @@ export class VoiceService {
 				console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 			});
 
-		VoiceService.audioPlayers.set(guild.id, audioPlayer);
+		this.audioPlayers.set(guild.id, audioPlayer);
 		voiceConnectionToSubscribe.subscribe(audioPlayer);
 
 		return audioPlayer;
 	}
 
 	getAudioResource(guild: Guild): AudioResource | undefined {
-		return VoiceService.audioResources.get(guild.id);
+		return this.audioResources.get(guild.id);
 	}
 
 	setAudioResource(guild: Guild, audioResource: AudioResource): void {
-		VoiceService.audioResources.set(guild.id, audioResource);
+		this.audioResources.set(guild.id, audioResource);
 	}
 
 	/**
 	 * This function will join the voice channel and handles the new voice session.
 	 *
-	 * The return value of resolveAudioResource() tells the bot what to play both at the start of the voice connection and when the voice goes idle
-	 * (basically, when the audio ends).
+	 * The return value of resolver() must be an async generator function which will yield the next audio resource.
+	 * If no audio resource is yielded/returned, it is assumed the session is over and the voice connection will be destroyed.
 	 */
 	async startVoiceSession({
 		guild,
 		voiceBasedChannel,
-		resolveAudioResource,
-		disconnectOnFirstIdle = false
+		nextAudioResourceResolver
 	}: {
 		guild: Guild;
 		voiceBasedChannel: VoiceBasedChannel;
-		resolveAudioResource: () => Promise<AudioResource | ConstantsTypes.VoiceConnectionSignals>;
-		disconnectOnFirstIdle?: boolean;
-	}): Promise<{ voiceConnection: VoiceConnection; audioPlayer: AudioPlayer } | null> {
-		const resolveAudioResourceResult = await resolveAudioResource();
-
-		if (!(resolveAudioResourceResult instanceof AudioResource)) {
-			return null;
-		}
-
-		const volume = await this.guildVolume(guild);
+		nextAudioResourceResolver: () => AsyncGenerator<AudioResource, void>;
+	}): Promise<boolean> {
 		const voiceConnection = this.createVoiceConnection(guild, voiceBasedChannel);
 		const audioPlayer = this.createAudioPlayer(guild, voiceConnection);
+		const resolverGenerator = nextAudioResourceResolver();
 
-		audioPlayer.play(resolveAudioResourceResult);
+		const resolveNextAudioResource = async (): Promise<boolean> => {
+			const { value: nextAudioResource } = await resolverGenerator.next();
 
-		this.setAudioResource(guild, resolveAudioResourceResult);
-		this.setAudioResourceVolume(guild, volume);
+			if (!nextAudioResource) {
+				this.destroyConnection(guild.id);
 
-		const onVoiceIdleFn = async (): Promise<void> => {
-			if (disconnectOnFirstIdle) {
-				console.info(`🟨 Disconnect on first idle for guild ${guild.name}.`);
-
-				return this.destroyConnection(guild.id);
+				return false;
 			}
 
-			const resolveAudioResourceOnIdleResult = await resolveAudioResource();
+			this.setAudioResource(guild, nextAudioResource);
+			this.setAudioResourceVolume(guild, await this.guildVolume(guild));
 
-			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.DISCONNECT) {
-				console.info(`🟨 Signal disconnect received for guild ${guild.name}.`);
+			audioPlayer.play(nextAudioResource);
 
-				return this.destroyConnection(guild.id);
-			}
-
-			if (resolveAudioResourceOnIdleResult === VOICE_CONNECTION_SIGNALS.COMPLETE) {
-				console.info(`🟨 Signal complete received for guild ${guild.name}.`);
-
-				return onVoiceIdleFn();
-			}
-
-			const volume = await this.guildVolume(guild);
-
-			this.getActiveAudioPlayer(guild)?.play(resolveAudioResourceOnIdleResult);
-			this.setAudioResource(guild, resolveAudioResourceOnIdleResult);
-			this.setAudioResourceVolume(guild, volume);
+			return true;
 		};
 
-		this.onVoiceIdle(audioPlayer, onVoiceIdleFn);
+		const hasFirstResource = await resolveNextAudioResource();
 
-		return { voiceConnection, audioPlayer };
+		if (hasFirstResource) {
+			this.onVoiceIdle(audioPlayer, resolveNextAudioResource);
+		}
+
+		return hasFirstResource;
 	}
 }

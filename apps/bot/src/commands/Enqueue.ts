@@ -38,9 +38,9 @@ export class Enqueue implements ICommand {
 	async execute(interaction: CommandInteraction) {
 		try {
 			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-			const [{ video_details: videoDetails }] = await this.youtubeService.getVideoInfos(resource);
+			const [{ video_details: videoDetails = null } = {}] = await this.youtubeService.getVideoInfos(resource);
 
-			if (!videoDetails || !videoDetails.id) {
+			if (!videoDetails || !videoDetails?.id) {
 				return void interaction.reply({
 					content: COMMAND.ERROR.INVALID_RESOURCE,
 					ephemeral: true
