@@ -49,7 +49,10 @@ export default {
 				NO_ITEM: 'The queue is empty!'
 			},
 			RESPONSE: {
-				SUCCESS: 'Now playing the audio.'
+				SUCCESS_EMBED: {
+					TITLE: '🔊  Now playing `{{{title}}}`!',
+					FOOTER: 'By {{channel}}, {{views}} views\nVideo duration is {{duration}}, uploaded {{uploaded}}'
+				}
 			}
 		},
 		STOP: {
@@ -84,7 +87,7 @@ export default {
 				}
 			},
 			RESPONSE: {
-				SUCCESS: 'Added `{{title}}` to the queue.'
+				SUCCESS: 'Added `{{{title}}}` to the queue.'
 			},
 			ERROR: {
 				INTERNAL_ERROR: 'There was an internal server problem.',
