@@ -11,23 +11,23 @@ import { type ConstantsTypes, VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants
 import type { Guild, VoiceBasedChannel } from 'discord.js';
 import { DatabaseService } from './DatabaseService';
 import type { Percent } from '../types';
-import { injectable } from 'tsyringe';
+import { singleton } from 'tsyringe';
 
-@injectable()
+@singleton()
 export class VoiceService {
 	constructor(private dbService: DatabaseService) {}
 
-	static voiceConnections = new Map<Guild['id'], VoiceConnection>();
+	voiceConnections = new Map<Guild['id'], VoiceConnection>();
 
-	static audioPlayers = new Map<Guild['id'], AudioPlayer>();
+	audioPlayers = new Map<Guild['id'], AudioPlayer>();
 
-	static audioResources = new Map<Guild['id'], AudioResource>();
+	audioResources = new Map<Guild['id'], AudioResource>();
 
 	/**
 	 * Get an audio player that has at least one subscribed connection
 	 */
 	getActiveAudioPlayer(guild: Guild): AudioPlayer | undefined {
-		const currentAudioPlayer = VoiceService.audioPlayers.get(guild.id);
+		const currentAudioPlayer = this.audioPlayers.get(guild.id);
 
 		if (currentAudioPlayer?.playable.length) {
 			return currentAudioPlayer;
@@ -50,7 +50,7 @@ export class VoiceService {
 	 * Destroy a voice connection if it exists and is not already destroyed.
 	 */
 	destroyConnection(guildId: string) {
-		const potentialVoiceConnection = VoiceService.voiceConnections.get(guildId);
+		const potentialVoiceConnection = this.voiceConnections.get(guildId);
 
 		if (potentialVoiceConnection?.state.status !== VoiceConnectionStatus.Destroyed) {
 			potentialVoiceConnection?.destroy();
@@ -74,7 +74,7 @@ export class VoiceService {
 			console.info(`📶 Voice status update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 		});
 
-		VoiceService.voiceConnections.set(guild.id, voiceConnection);
+		this.voiceConnections.set(guild.id, voiceConnection);
 
 		return voiceConnection;
 	}
@@ -98,7 +98,7 @@ export class VoiceService {
 	 * Sets the volume of the last created audio resource.
 	 */
 	setAudioResourceVolume(guild: Guild, setPercent: Percent): boolean {
-		const audioResourceVolumeProperty = VoiceService.audioResources.get(guild.id)?.volume;
+		const audioResourceVolumeProperty = this.audioResources.get(guild.id)?.volume;
 
 		if (audioResourceVolumeProperty) {
 			audioResourceVolumeProperty.setVolumeLogarithmic(setPercent / 100);
@@ -119,18 +119,18 @@ export class VoiceService {
 				console.info(`🎵 Audio player update for guild "${guild.name}": ${oldState.status} -> ${newState.status}.`);
 			});
 
-		VoiceService.audioPlayers.set(guild.id, audioPlayer);
+		this.audioPlayers.set(guild.id, audioPlayer);
 		voiceConnectionToSubscribe.subscribe(audioPlayer);
 
 		return audioPlayer;
 	}
 
 	getAudioResource(guild: Guild): AudioResource | undefined {
-		return VoiceService.audioResources.get(guild.id);
+		return this.audioResources.get(guild.id);
 	}
 
 	setAudioResource(guild: Guild, audioResource: AudioResource): void {
-		VoiceService.audioResources.set(guild.id, audioResource);
+		this.audioResources.set(guild.id, audioResource);
 	}
 
 	/**
