@@ -117,7 +117,11 @@ export class Quickplay implements ICommand {
 			.setFooter({
 				text: t(EMBED.FOOTER, {
 					views: this.botService.formatters.numberFormat.format(videoDetails.views),
-					duration: videoDetails.durationRaw
+					duration: videoDetails.durationRaw,
+					channel: videoDetails.channel?.name,
+					uploaded:
+						videoDetails.uploadedAt &&
+						this.botService.formatters.dateTimeFormat.format(new Date(videoDetails.uploadedAt))
 				})
 			});
 	}
