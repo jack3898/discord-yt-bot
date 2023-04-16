@@ -135,7 +135,18 @@ export default {
 					FOOTER: 'Displaying up to the next {{defaultcount}} items. {{count}} item(s) are in the queue.'
 				}
 			}
+		},
+		SKIP: {
+			NAME: 'skip',
+			DESC: 'Skip the current playing audio.',
+			RESPONSE: 'Attempted to skip!',
+			ERROR: {
+				INTERNAL_ERROR: 'There was an internal server problem.',
+				INVALID_RESOURCE: 'The provided resource is invalid.',
+				INVALID_CHANNEL: 'I must be playing and connected to the same voice channel as you!',
+				NOT_PLAYING: 'I am not currently playing anything that could be skipped!',
+				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.'
+			}
 		}
-	},
-	SERVICES: {}
+	}
 } as const;
