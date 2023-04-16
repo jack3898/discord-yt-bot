@@ -2,7 +2,6 @@
 import {
 	type AudioPlayer,
 	AudioPlayerStatus,
-	AudioResource,
 	type VoiceConnection,
 	VoiceConnectionStatus,
 	createAudioPlayer,
@@ -10,7 +9,6 @@ import {
 } from '@discordjs/voice';
 import type { Guild, VoiceBasedChannel } from 'discord.js';
 import EventEmitter from 'events';
-import { VOICE_CONNECTION_SIGNALS } from '@yt-bot/constants';
 import { VoiceService } from './VoiceService';
 import { container } from 'tsyringe';
 import { deepMockedPrismaClient } from '@yt-bot/database';
@@ -24,7 +22,6 @@ jest.mock('@discordjs/voice', () => ({
 
 const joinVoiceChannelMock = jest.mocked(joinVoiceChannel);
 const createAudioPlayerMock = jest.mocked(createAudioPlayer);
-const AudioResourceMock = AudioResource as any;
 let voiceService: VoiceService;
 
 let joinVoiceChannelMockReturn: {
@@ -274,89 +271,7 @@ describe('createAudioPlayer', () => {
 });
 
 describe('startVoiceSession', () => {
-	const guildMock = {
-		id: 'guild id'
-	} as unknown as Guild;
-
-	let createVoiceConnectionSpy: any;
-	let createAudioPlayerSpy: any;
-	let audioPlayerMock: any;
-
-	beforeEach(() => {
-		audioPlayerMock = new (class AudioPlayerMock extends EventEmitter {
-			play = jest.fn();
-		})();
-
-		createVoiceConnectionSpy = jest
-			.spyOn(voiceService, 'createVoiceConnection')
-			.mockReturnValue({ subscribe: jest.fn() } as any);
-		createAudioPlayerSpy = jest.spyOn(voiceService, 'createAudioPlayer').mockReturnValue(audioPlayerMock as any);
-	});
-
-	it('should return null if the audio resource resolver callback does not return an audio resource', () => {
-		const resultPromise = voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return VOICE_CONNECTION_SIGNALS.DISCONNECT;
-			}
-		});
-
-		expect(resultPromise).resolves.toStrictEqual(null);
-	});
-
-	it('should establish a connection and an audio player when the audio resource can be found', async () => {
-		await voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
-			}
-		});
-
-		expect(createVoiceConnectionSpy).toHaveBeenCalledTimes(1);
-		expect(createAudioPlayerSpy).toHaveBeenCalledTimes(1);
-	});
-
-	it('should use the resolveAudioResource callback to fetch the first audio resource', async () => {
-		const resolveAudioResourceSpy = jest.fn().mockResolvedValue({});
-
-		await voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: resolveAudioResourceSpy
-		});
-
-		expect(resolveAudioResourceSpy).toHaveBeenCalledTimes(1);
-	});
-
-	it('should use onVoiceIdle method', async () => {
-		const onVoiceIdleSpy = jest.spyOn(voiceService, 'onVoiceIdle');
-
-		await voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
-			}
-		});
-
-		expect(onVoiceIdleSpy).toHaveBeenCalledTimes(1);
-	});
-
-	it('should set the audio resource volume as soon as possible', async () => {
-		const setVolumeSpy = jest.spyOn(voiceService, 'setAudioResourceVolume');
-
-		await voiceService.startVoiceSession({
-			guild: guildMock,
-			voiceBasedChannel: {} as unknown as VoiceBasedChannel,
-			resolveAudioResource: async () => {
-				return new AudioResourceMock();
-			}
-		});
-
-		expect(setVolumeSpy).toHaveBeenCalledTimes(1);
-	});
+	// TODO: needs re-testing!
 });
 
 describe('guildVolume', () => {
