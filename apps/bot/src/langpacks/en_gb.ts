@@ -51,7 +51,8 @@ export default {
 			RESPONSE: {
 				SUCCESS_EMBED: {
 					TITLE: '🔊  Now playing `{{{title}}}`!',
-					FOOTER: 'By {{channel}}, {{views}} views\nVideo duration is {{duration}}, uploaded {{uploaded}}'
+					FOOTER: 'By {{channel}}, {{views}} views\nLength {{duration}}, uploaded {{uploaded}}',
+					LIVE_DURATION: 'LIVE 🔴'
 				}
 			}
 		},
