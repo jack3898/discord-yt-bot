@@ -148,6 +148,21 @@ export default {
 				NOT_PLAYING: 'I am not currently playing anything that could be skipped!',
 				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.'
 			}
+		},
+		PAUSE: {
+			NAME: 'togglepause',
+			DESC: 'Pause and resume the current playing audio.',
+			RESPONSE: {
+				PAUSED: '⏸️ Paused!',
+				RESUMED: '▶️ Resumed!'
+			},
+			ERROR: {
+				INTERNAL_ERROR: 'There was an internal server problem.',
+				INVALID_RESOURCE: 'The provided resource is invalid.',
+				INVALID_CHANNEL: 'I must be playing and connected to the same voice channel as you!',
+				NOT_PLAYING: 'I am not currently playing anything that could be paused!',
+				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.'
+			}
 		}
 	}
 } as const;
