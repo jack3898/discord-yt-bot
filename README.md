@@ -1,6 +1,6 @@
 # Discord YouTube Bot
 
-A Node-based Discord YouTube bot. It's currently in development and there are more features to come!
+A Node-based Discord YouTube bot. There are more features to come!
 
 This bot is written with Discord.js v14, using the Discord v10 API. So it uses slash commands.
 
@@ -52,6 +52,18 @@ Kubernetes support is very under-developed, so I would not recommend you use it.
 TIP:
 If you use Visual Studio Code, there is an out of the box debugger profile you can use.
 
+### Monorepo
+
+This project uses a monorepo approach, so all local packages needed for this bot to run is defined in this repo.
+
+Any utilities and configs go in the `/packages` directory. And executable applications go in `/apps`.
+
+### Dependency injection
+
+DI is used a lot in this project. It helps with managing class instances and makes things easier to unit test.
+
+If you're not familiar with DI, it lets TS automatically construct and pass instances into a class constructor. You will see it used extensively with the command definitions.
+
 ### Testing
 
 You can run `yarn run test:watch` to run tests for all packages and files changed since the last commit. While you develop, I recommend just `cd`-ing to the package directory and running `npx jest --watch`.
@@ -63,3 +75,9 @@ Check out the README in packages/database for more info on how database mocking 
 ## How do I contribute?
 
 At the moment this is a small project and it's just been me developing it at the moment, so contributing guidelines and repository settings have not been finalised for contributions! So just raise an issue, submit a PR or get in touch if you want more information. :) I won't blame you for missing some details.
+
+## Future plans
+
+After MVP, I will look into adding shuffling,
+
+I know React quite well, so after I have reached the MVP milestone, I may create a modern web UI to provide more features. Slash commands can only go so far, and I have made the mistake of making the bot too advanced for its own good (i.e. controlling the bot with buttons in the chat, works great until the interaction expires in Discord's API!)
