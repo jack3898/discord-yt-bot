@@ -73,7 +73,7 @@ export class Play implements ICommand {
 							return;
 						}
 
-						const [url] = this.youtubeService.getVideoUrls(resource);
+						const [url] = await this.youtubeService.getVideoUrls(resource);
 
 						if (!url) {
 							return;

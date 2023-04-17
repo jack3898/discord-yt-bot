@@ -50,7 +50,7 @@ export class Quickplay implements ICommand {
 				voiceBasedChannel: commandAuthorVoiceChannel,
 				nextAudioResourceResolver: async function* (this: Quickplay) {
 					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-					const [url] = this.youtubeService.getVideoUrls(resource);
+					const [url] = await this.youtubeService.getVideoUrls(resource);
 
 					if (!url) {
 						return;

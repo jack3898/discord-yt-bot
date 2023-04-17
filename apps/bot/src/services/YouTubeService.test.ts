@@ -18,22 +18,22 @@ afterEach(() => {
 
 describe('getVideoUrls method', () => {
 	describe('valid resources', () => {
-		it('should resolve a URL when provided a video ID', () => {
-			const result = youtubeService.getVideoUrls('bSiEB64FyF8');
+		it('should resolve a URL when provided a video ID', async () => {
+			const result = await youtubeService.getVideoUrls('bSiEB64FyF8');
 
 			expect(result).toHaveLength(1);
 			expect(result[0]).toStrictEqual('https://www.youtube.com/watch?v=bSiEB64FyF8');
 		});
 
-		it('should resolve a URL when provided a normal video URL', () => {
-			const result = youtubeService.getVideoUrls('https://www.youtube.com/watch?v=bSiEB64FyF8');
+		it('should resolve a URL when provided a normal video URL', async () => {
+			const result = await youtubeService.getVideoUrls('https://www.youtube.com/watch?v=bSiEB64FyF8');
 
 			expect(result).toHaveLength(1);
 			expect(result[0]).toStrictEqual('https://www.youtube.com/watch?v=bSiEB64FyF8');
 		});
 
-		it('should result a URL when provided a shortened video URL', () => {
-			const result = youtubeService.getVideoUrls('https://youtu.be/bSiEB64FyF8');
+		it('should result a URL when provided a shortened video URL', async () => {
+			const result = await youtubeService.getVideoUrls('https://youtu.be/bSiEB64FyF8');
 
 			expect(result).toHaveLength(1);
 			expect(result[0]).toStrictEqual('https://youtu.be/bSiEB64FyF8');
@@ -41,29 +41,29 @@ describe('getVideoUrls method', () => {
 	});
 
 	describe('invalid resources', () => {
-		it('wrong domain', () => {
-			const result = youtubeService.getVideoUrls('https://google.com');
+		it('wrong domain', async () => {
+			const result = await youtubeService.getVideoUrls('https://google.com');
 
 			expect(result).toHaveLength(0);
 			expect(result).toBeInstanceOf(Array);
 		});
 
-		it('any string', () => {
-			const result = youtubeService.getVideoUrls('hello');
+		it('any string', async () => {
+			const result = await youtubeService.getVideoUrls('hello');
 
 			expect(result).toHaveLength(0);
 			expect(result).toBeInstanceOf(Array);
 		});
 
-		it('invalid ID', () => {
-			const result = youtubeService.getVideoUrls('https://www.youtube.com/watch?v=hello');
+		it('invalid ID', async () => {
+			const result = await youtubeService.getVideoUrls('https://www.youtube.com/watch?v=hello');
 
 			expect(result).toHaveLength(0);
 			expect(result).toBeInstanceOf(Array);
 		});
 
-		it('invalid ID shortened', () => {
-			const result = youtubeService.getVideoUrls('https://youtu.be/hello');
+		it('invalid ID shortened', async () => {
+			const result = await youtubeService.getVideoUrls('https://youtu.be/hello');
 
 			expect(result).toHaveLength(0);
 			expect(result).toBeInstanceOf(Array);
