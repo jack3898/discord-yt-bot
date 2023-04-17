@@ -22,11 +22,20 @@ export class YouTubeService {
 	 */
 	async getVideoUrls(resource: string): Promise<(string | undefined)[]> {
 		switch (ytValidate(resource)) {
+			case 'playlist': {
+				try {
+					const playlistInfo = await ytPlaylistInfo(resource);
+					const allVideos = await playlistInfo.all_videos();
+
+					return allVideos.map(({ url }) => url);
+				} catch (error) {
+					console.error(error);
+
+					return [];
+				}
+			}
 			case 'video': {
 				return resource.startsWith('https') ? [resource] : [`https://www.youtube.com/watch?v=${resource}`];
-			}
-			case 'playlist': {
-				return []; // Not implemented!
 			}
 			case 'search': {
 				return []; // Not implemented!

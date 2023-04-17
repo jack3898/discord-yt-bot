@@ -51,7 +51,10 @@ export default {
 			RESPONSE: {
 				SUCCESS_EMBED: {
 					TITLE: '🔊  Now playing `{{{title}}}`!',
-					FOOTER: 'By {{channel}}, {{views}} views\nLength {{duration}}, uploaded {{uploaded}}',
+					FOOTER: 'By {{channel}}, {{views}} views\nLength {{duration}}, uploaded {{uploaded}}\n{{additionalinfo}}',
+					FOOTER_OF_PLAYLIST:
+						'This is part of a playlist with {{count}} videos (private videos have been removed).',
+					FOOTER_OF_VIDEO: 'Not a playlist.',
 					LIVE_DURATION: 'LIVE 🔴'
 				}
 			}
