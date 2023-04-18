@@ -4,20 +4,20 @@ import type {
 	ServerToClientEvents as S2C,
 	SocketData
 } from '../types/socket';
-import { SHARDS, SHARD_MANAGER_URL } from '@yt-bot/env';
 import { AllocationManager } from './AllocationManager';
 import { Server } from 'socket.io';
+import env from '@yt-bot/env';
 
-if (!SHARD_MANAGER_URL || !SHARDS) {
+if (!env.SHARD_MANAGER_URL || !env.SHARDS) {
 	console.log('🟨 SHARD_MANAGER_URL or SHARDS env vars not in environment. Exiting...');
 	console.log('If the bot is not sharded, then you can ignore this message.');
 
 	process.exit(1);
 }
 
-const io = new Server<C2S, S2C, InterServerEvents, SocketData>(+SHARD_MANAGER_URL.port);
+const io = new Server<C2S, S2C, InterServerEvents, SocketData>(+new URL(env.SHARD_MANAGER_URL).port);
 
-const allocationManager = new AllocationManager(SHARDS);
+const allocationManager = new AllocationManager(+env.SHARDS);
 
 io.on('connection', () => {
 	io.sockets.once('connection', (socket) => {
@@ -44,4 +44,4 @@ io.on('connection', () => {
 	});
 });
 
-console.log(`🟩 Shard manager online. Ready to allocate up to ${SHARDS} shards.`);
+console.log(`🟩 Shard manager online. Ready to allocate up to ${env.SHARDS} shards.`);

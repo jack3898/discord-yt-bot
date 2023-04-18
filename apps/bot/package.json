@@ -30,6 +30,7 @@
         "@yt-bot/database": "*",
         "@yt-bot/env": "*",
         "@yt-bot/i18n": "*",
+        "@yt-bot/validation": "*",
         "discord.js": "^14.7.1",
         "ffmpeg-static": "^5.1.0",
         "play-dl": "^1.9.6",

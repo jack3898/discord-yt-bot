@@ -1,34 +1,35 @@
 {
-	"name": "@yt-bot/constants",
-	"private": true,
-	"version": "1.0.0",
-	"description": "Values that remain the same throughout the entire lifetime of an application.",
-	"main": "src/index.ts",
-	"scripts": {
-		"test": "jest"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
-	},
-	"author": "Jack Wright and contributors",
-	"license": "GPL-3.0",
-	"bugs": {
-		"url": "https://github.com/jack3898/discord-yt-bot/issues"
-	},
-	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
-	"engines": {
-		"node": "18.x"
-	},
-	"dependencies": {},
-	"devDependencies": {
-		"@types/jest": "^29.2.3",
-		"@yt-bot/config-jest": "*",
-		"@yt-bot/config-ts": "*",
-		"@yt-bot/eslint-config-yt-bot": "*",
-		"jest": "^29.3.1",
-		"ts-jest": "^29.0.3",
-		"typescript": "^4.9.3"
-	},
-	"peerDependencies": {}
+    "name": "@yt-bot/constants",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Values that remain the same throughout the entire lifetime of an application.",
+    "main": "src/index.ts",
+    "scripts": {
+        "test": "jest",
+        "lint": "eslint **/*.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jack3898/discord-yt-bot.git"
+    },
+    "author": "Jack Wright and contributors",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/jack3898/discord-yt-bot/issues"
+    },
+    "homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+    "engines": {
+        "node": "18.x"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "@types/jest": "^29.2.3",
+        "@yt-bot/config-jest": "*",
+        "@yt-bot/config-ts": "*",
+        "@yt-bot/eslint-config-yt-bot": "*",
+        "jest": "^29.3.1",
+        "ts-jest": "^29.0.3",
+        "typescript": "^4.9.3"
+    },
+    "peerDependencies": {}
 }

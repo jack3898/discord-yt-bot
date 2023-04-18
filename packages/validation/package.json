@@ -1,13 +1,10 @@
 {
-    "name": "@yt-bot/database",
+    "name": "@yt-bot/validation",
     "private": true,
     "version": "1.0.0",
-    "description": "Database service for this bot.",
+    "description": "Zod validation for this monorepo.",
     "main": "src/index.ts",
     "scripts": {
-        "build": "prisma generate",
-        "db-push": "prisma db push",
-        "db-studio": "prisma studio",
         "lint": "eslint **/*.ts"
     },
     "repository": {
@@ -24,14 +21,10 @@
         "node": "18.x"
     },
     "dependencies": {
-        "@prisma/client": "^4.9.0",
-        "prisma": "^4.9.0"
+        "zod": "^3.21.4"
     },
     "devDependencies": {
-        "@yt-bot/config-ts": "*",
         "@yt-bot/eslint-config-yt-bot": "*"
     },
-    "peerDependencies": {
-        "jest-mock-extended": "^3.0.4"
-    }
+    "peerDependencies": {}
 }

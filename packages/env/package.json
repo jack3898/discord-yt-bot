@@ -1,32 +1,35 @@
 {
-	"name": "@yt-bot/env",
-	"private": true,
-	"version": "1.0.0",
-	"description": "Type-safe environment variable access.",
-	"main": "index.ts",
-	"scripts": {},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/jack3898/discord-yt-bot.git"
-	},
-	"author": "Jack Wright and contributors",
-	"license": "GPL-3.0",
-	"bugs": {
-		"url": "https://github.com/jack3898/discord-yt-bot/issues"
-	},
-	"homepage": "https://github.com/jack3898/discord-yt-bot#readme",
-	"engines": {
-		"node": "18.x"
-	},
-	"dependencies": {
-		"@yt-bot/constants": "*",
-		"dotenv": "^16.0.3"
-	},
-	"devDependencies": {
-		"@yt-bot/config-ts": "*",
-		"@yt-bot/eslint-config-yt-bot": "*",
-		"jest": "^29.3.1",
-		"typescript": "^4.9.3"
-	},
-	"peerDependencies": {}
+    "name": "@yt-bot/env",
+    "private": true,
+    "version": "1.0.0",
+    "description": "Type-safe environment variable access.",
+    "main": "index.ts",
+    "scripts": {
+        "lint": "eslint **/*.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/jack3898/discord-yt-bot.git"
+    },
+    "author": "Jack Wright and contributors",
+    "license": "GPL-3.0",
+    "bugs": {
+        "url": "https://github.com/jack3898/discord-yt-bot/issues"
+    },
+    "homepage": "https://github.com/jack3898/discord-yt-bot#readme",
+    "engines": {
+        "node": "18.x"
+    },
+    "dependencies": {
+        "@yt-bot/constants": "*",
+        "@yt-bot/validation": "*",
+        "dotenv": "^16.0.3"
+    },
+    "devDependencies": {
+        "@yt-bot/config-ts": "*",
+        "@yt-bot/eslint-config-yt-bot": "*",
+        "jest": "^29.3.1",
+        "typescript": "^4.9.3"
+    },
+    "peerDependencies": {}
 }

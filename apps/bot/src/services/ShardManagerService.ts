@@ -3,7 +3,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@yt-bot/shard-m
 import { type Socket, io } from 'socket.io-client';
 import { RestService } from './RestService';
 import { Routes } from 'discord.js';
-import { SHARD_MANAGER_URL } from '@yt-bot/env';
+import env from '@yt-bot/env';
 import { singleton } from 'tsyringe';
 
 /**
@@ -18,8 +18,8 @@ export class ShardManagerService {
 	enabled: boolean;
 
 	constructor(private restService: RestService) {
-		if (SHARD_MANAGER_URL) {
-			this.io = io(SHARD_MANAGER_URL.toString(), { forceNew: true });
+		if (env.SHARD_MANAGER_URL) {
+			this.io = io(env.SHARD_MANAGER_URL.toString(), { forceNew: true });
 			this.enabled = true;
 
 			return;

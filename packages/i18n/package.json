@@ -4,7 +4,9 @@
     "version": "1.0.0",
     "description": "Internationalisation tooling and definitions for this bot.",
     "main": "src/index.ts",
-    "scripts": {},
+    "scripts": {
+        "lint": "eslint **/*.ts"
+    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/jack3898/discord-yt-bot.git"

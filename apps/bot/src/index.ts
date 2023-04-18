@@ -1,8 +1,8 @@
 import 'reflect-metadata';
 
 import { BotService, CommandService, ShardManagerService } from './services';
-import { DISCORD_TOKEN } from '@yt-bot/env';
 import { container } from 'tsyringe';
+import env from '@yt-bot/env';
 
 /**
  * Entry to the app.
@@ -21,7 +21,7 @@ async function main() {
 
 	const bot = container.resolve(BotService);
 
-	bot.login(DISCORD_TOKEN);
+	bot.login(env.DISCORD_TOKEN);
 
 	// Global bot event listeners
 	await bot.registerClientEvents();
