@@ -1,5 +1,6 @@
 import { type AudioResource, createAudioResource } from '@discordjs/voice';
 import {
+	type InfoData as PlaydlInfoData,
 	stream as startStream,
 	video_basic_info as videoBasicInfo,
 	playlist_info as ytPlaylistInfo,
@@ -17,8 +18,8 @@ export class YouTubeService {
 	 * The resource may be one of:
 	 * - Video ID
 	 * - URL (shortened or normal)
-	 * - Search term (not yet implemented)
 	 * - Playlist URL
+	 * - Search term (not yet implemented)
 	 */
 	async getVideoUrls(resource: string): Promise<(string | undefined)[]> {
 		switch (ytValidate(resource)) {
@@ -64,12 +65,18 @@ export class YouTubeService {
 	 * The resource may be one of:
 	 * - Video ID
 	 * - URL (shortened or normal)
+	 * - Playlist URL
 	 * - Search term (not yet implemented)
-	 * - Playlist URL (not yet implemented)
 	 */
-	async getVideoInfos(resource: string) {
+	async getVideoInfos(resource: string): Promise<PlaydlInfoData[]> {
 		const urls = await this.getVideoUrls(resource);
 
-		return Promise.all(urls.filter((value): value is string => Boolean(value)).map((url) => videoBasicInfo(url)));
+		const videos = await Promise.allSettled(
+			urls.filter((value): value is string => Boolean(value)).map((url) => videoBasicInfo(url))
+		);
+
+		return videos
+			.map((video) => video.status === 'fulfilled' && video.value)
+			.filter((value): value is PlaydlInfoData => !!value);
 	}
 }

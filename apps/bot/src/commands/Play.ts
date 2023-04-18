@@ -90,6 +90,8 @@ export class Play implements ICommand {
 				}.bind(this)
 			});
 
+			await this.queueService.clearExpired(interaction.guildId);
+
 			if (startVoiceSessionResult) {
 				return await interaction.reply(COMMAND.RESPONSE.SUCCESS);
 			}

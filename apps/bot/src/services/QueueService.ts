@@ -20,42 +20,48 @@ export class QueueService {
 	 * @returns
 	 */
 	async addItemToQueue(
-		resourceData: string,
+		resourceData: string[],
 		resourceType: ConstantsTypes.ResourceType,
 		discordUserId: string,
 		discordGuildId?: string
 	) {
-		return this.dbService.prisma.queue.create({
-			data: {
-				resource: {
-					connectOrCreate: {
-						where: {
-							resource: resourceData
-						},
-						create: {
-							resource: resourceData,
-							resourceType: {
-								connect: { name: resourceType }
-							}
-						}
-					}
-				},
-				discordUser: {
-					connectOrCreate: {
-						where: { id: discordUserId },
-						create: { id: discordUserId }
-					}
-				},
-				discordGuild: discordGuildId
-					? {
+		// prisma.model.createMany() is not supported on SQLite.
+		// At some point we will move to PostgreSQL for a more performant query. Anything bigger than a few hundred takes a long time.
+		return this.dbService.prisma.$transaction(
+			resourceData.map((resourceItem) =>
+				this.dbService.prisma.queue.create({
+					data: {
+						resource: {
 							connectOrCreate: {
-								where: { id: discordGuildId },
-								create: { id: discordGuildId }
+								where: {
+									resource: resourceItem
+								},
+								create: {
+									resource: resourceItem,
+									resourceType: {
+										connect: { name: resourceType }
+									}
+								}
 							}
-					  }
-					: undefined
-			}
-		});
+						},
+						discordUser: {
+							connectOrCreate: {
+								where: { id: discordUserId },
+								create: { id: discordUserId }
+							}
+						},
+						discordGuild: discordGuildId
+							? {
+									connectOrCreate: {
+										where: { id: discordGuildId },
+										create: { id: discordGuildId }
+									}
+							  }
+							: undefined
+					}
+				})
+			)
+		);
 	}
 
 	async getItemsByCursor(cursor?: number, take = 1) {
@@ -99,6 +105,15 @@ export class QueueService {
 		return this.dbService.prisma.queue.update({
 			where: { id: queueItemId },
 			data: { expired: true }
+		});
+	}
+
+	clearExpired(guildId: string) {
+		return this.dbService.prisma.queue.deleteMany({
+			where: {
+				discordGuildId: guildId,
+				expired: true
+			}
 		});
 	}
 }
