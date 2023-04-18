@@ -51,7 +51,10 @@ export default {
 			RESPONSE: {
 				SUCCESS_EMBED: {
 					TITLE: '🔊  Now playing `{{{title}}}`!',
-					FOOTER: 'By {{channel}}, {{views}} views\nLength {{duration}}, uploaded {{uploaded}}',
+					FOOTER: 'By {{channel}}, {{views}} views\nLength {{duration}}, uploaded {{uploaded}}\n{{additionalinfo}}',
+					FOOTER_OF_PLAYLIST:
+						'This is part of a playlist with {{count}} videos (private videos have been removed).',
+					FOOTER_OF_VIDEO: 'Not a playlist.',
 					LIVE_DURATION: 'LIVE 🔴'
 				}
 			}
@@ -88,7 +91,8 @@ export default {
 				}
 			},
 			RESPONSE: {
-				SUCCESS: 'Added `{{{title}}}` to the queue.'
+				SUCCESS:
+					'Added `{{count}}` videos to the queue. Some may have been omitted as they are private, age restricted or something else.'
 			},
 			ERROR: {
 				INTERNAL_ERROR: 'There was an internal server problem.',
@@ -117,7 +121,7 @@ export default {
 					TITLE: 'Your queue',
 					ITEM_TITLE: '{{index}}) {{videotitle}}',
 					ITEM_TITLE_EMPTY: 'Empty :(',
-					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{videourl}}) ',
+					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{{videourl}}}) ',
 					ITEM_DETAILS_EMPTY: 'The queue is empty!',
 					FOOTER: 'Displaying up to the next {{defaultcount}} items. {{count}} item(s) are in the queue.'
 				}

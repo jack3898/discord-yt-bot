@@ -45,32 +45,33 @@ export class Quickplay implements ICommand {
 				});
 			}
 
+			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
+			const urls = await this.youtubeService.getVideoUrls(resource);
+
 			const startVoiceSessionResult = await this.voiceService.startVoiceSession({
 				guild: interaction.guild,
 				voiceBasedChannel: commandAuthorVoiceChannel,
 				nextAudioResourceResolver: async function* (this: Quickplay) {
-					const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-					const [url] = this.youtubeService.getVideoUrls(resource);
+					for (const url of urls) {
+						if (!url) {
+							return;
+						}
 
-					if (!url) {
-						return;
+						const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
+
+						if (!audioResource) {
+							continue; // There was a problem just move on
+						}
+
+						yield audioResource;
 					}
-
-					const audioResource = await this.youtubeService.createAudioResourceFromUrl(url);
-
-					if (!audioResource) {
-						return;
-					}
-
-					yield audioResource;
 				}.bind(this)
 			});
 
-			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-			const [info] = await this.youtubeService.getVideoInfos(resource);
+			const info = await this.youtubeService.getVideoInfos(urls[0] || '');
 
-			if (startVoiceSessionResult && info) {
-				const successEmbed = this.createVideoDetailsEmbed(info);
+			if (startVoiceSessionResult && info?.[0]) {
+				const successEmbed = this.createVideoDetailsEmbed(info[0], urls.length);
 
 				return await interaction.reply({
 					embeds: [successEmbed]
@@ -90,7 +91,7 @@ export class Quickplay implements ICommand {
 		}
 	}
 
-	createVideoDetailsEmbed({ video_details: videoDetails }: PlaydlInfoData) {
+	createVideoDetailsEmbed({ video_details: videoDetails }: PlaydlInfoData, videoCount: number) {
 		const EMBED = COMMAND.RESPONSE.SUCCESS_EMBED;
 
 		return new EmbedBuilder()
@@ -122,7 +123,9 @@ export class Quickplay implements ICommand {
 					channel: videoDetails.channel?.name,
 					uploaded:
 						videoDetails.uploadedAt &&
-						this.botService.formatters.dateTimeFormat.format(new Date(videoDetails.uploadedAt))
+						this.botService.formatters.dateTimeFormat.format(new Date(videoDetails.uploadedAt)),
+					additionalinfo:
+						videoCount > 1 ? t(EMBED.FOOTER_OF_PLAYLIST, { count: videoCount }) : EMBED.FOOTER_OF_VIDEO
 				})
 			});
 	}

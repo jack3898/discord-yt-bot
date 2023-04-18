@@ -37,10 +37,13 @@ export class Enqueue implements ICommand {
 
 	async execute(interaction: CommandInteraction) {
 		try {
-			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
-			const [{ video_details: videoDetails = null } = {}] = await this.youtubeService.getVideoInfos(resource);
+			await interaction.deferReply();
 
-			if (!videoDetails || !videoDetails?.id) {
+			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
+			const videos = await this.youtubeService.getVideoInfos(resource);
+			const videoIds = videos.map(({ video_details: { id } }) => id).filter((id): id is string => !!id);
+
+			if (!videoIds.length) {
 				return void interaction.reply({
 					content: COMMAND.ERROR.INVALID_RESOURCE,
 					ephemeral: true
@@ -50,15 +53,15 @@ export class Enqueue implements ICommand {
 			const entityType = interaction.options.getString(COMMAND.OPTION.TARGET.NAME) || ENTITY_TYPES.GUILD;
 
 			await this.queueService.addItemToQueue(
-				videoDetails.id,
+				videoIds,
 				RESOURCE_TYPES.YOUTUBE_VIDEO,
 				interaction.member.id,
 				entityType === ENTITY_TYPES.GUILD ? interaction.guild.id : undefined
 			);
 
-			await interaction.reply(
+			await interaction.editReply(
 				t(COMMAND.RESPONSE.SUCCESS, {
-					title: videoDetails.title
+					count: videoIds.length
 				})
 			);
 		} catch (error) {

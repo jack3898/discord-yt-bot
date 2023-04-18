@@ -18,10 +18,16 @@ export class Volume implements ICommand {
 		const userVolumeChoice = interaction.options.getNumber('percentage') || undefined;
 		const clampedVolume = userVolumeChoice && (Math.min(Math.max(userVolumeChoice, 0), 100) as Percent);
 		const volume = await this.voiceService.guildVolume(interaction.guild, clampedVolume);
-		const volumeHasBeenSet = this.voiceService.setAudioResourceVolume(interaction.guild, volume);
+		this.voiceService.setAudioResourceVolume(interaction.guild, volume);
 
-		return userVolumeChoice && volumeHasBeenSet
-			? interaction.reply(`Volume set to \`${volume}%\`.`)
-			: interaction.reply(`Current volume is \`${volume}%\`.`);
+		const volumeInfoLength = volume / 10;
+
+		const emojiGraphic = Array.from({ length: 10 })
+			.map((_, index) => (volumeInfoLength > index ? '🟩' : '⬜'))
+			.join('');
+
+		return userVolumeChoice
+			? interaction.reply(`Volume set to \`${volume}%\`\n\n${emojiGraphic}`)
+			: interaction.reply(`Current volume is \`${volume}%\`\n\n${emojiGraphic}`);
 	}
 }

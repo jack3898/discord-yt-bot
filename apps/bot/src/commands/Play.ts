@@ -73,7 +73,7 @@ export class Play implements ICommand {
 							return;
 						}
 
-						const [url] = this.youtubeService.getVideoUrls(resource);
+						const [url] = await this.youtubeService.getVideoUrls(resource);
 
 						if (!url) {
 							return;
@@ -89,6 +89,8 @@ export class Play implements ICommand {
 					}
 				}.bind(this)
 			});
+
+			await this.queueService.clearExpired(interaction.guildId);
 
 			if (startVoiceSessionResult) {
 				return await interaction.reply(COMMAND.RESPONSE.SUCCESS);

@@ -1,9 +1,15 @@
 import { type AudioResource, createAudioResource } from '@discordjs/voice';
-import { stream as startStream, video_basic_info as videoBasicInfo, yt_validate as ytValidate } from 'play-dl';
+import {
+	type InfoData as PlaydlInfoData,
+	stream as startStream,
+	video_basic_info as videoBasicInfo,
+	playlist_info as ytPlaylistInfo,
+	yt_validate as ytValidate
+} from 'play-dl';
 import { singleton } from 'tsyringe';
 
 /**
- * Uses ytdl, @Discord.js/voice and the YouTube API to provide a simple abstraction for everything YouTube.
+ * Uses playdl, @Discord.js/voice and the YouTube API to provide a simple abstraction for everything YouTube.
  */
 @singleton()
 export class YouTubeService {
@@ -12,17 +18,32 @@ export class YouTubeService {
 	 * The resource may be one of:
 	 * - Video ID
 	 * - URL (shortened or normal)
+	 * - Playlist URL
 	 * - Search term (not yet implemented)
-	 * - Playlist URL (not yet implemented)
 	 */
-	getVideoUrls(resource: string): string[] {
-		if (resource.startsWith('https') && ytValidate(resource) === 'video') {
-			return [resource];
-		} else if (ytValidate(resource) === 'video') {
-			return [`https://www.youtube.com/watch?v=${resource}`];
-		}
+	async getVideoUrls(resource: string): Promise<(string | undefined)[]> {
+		switch (ytValidate(resource)) {
+			case 'playlist': {
+				try {
+					const playlistInfo = await ytPlaylistInfo(resource);
+					const allVideos = await playlistInfo.all_videos();
 
-		return [];
+					return allVideos.map(({ url }) => url);
+				} catch (error) {
+					console.error(error);
+
+					return [];
+				}
+			}
+			case 'video': {
+				return resource.startsWith('https') ? [resource] : [`https://www.youtube.com/watch?v=${resource}`];
+			}
+			case 'search': {
+				return []; // Not implemented!
+			}
+			default:
+				return [];
+		}
 	}
 
 	async createAudioResourceFromUrl(url: string): Promise<AudioResource | null> {
@@ -44,10 +65,18 @@ export class YouTubeService {
 	 * The resource may be one of:
 	 * - Video ID
 	 * - URL (shortened or normal)
+	 * - Playlist URL
 	 * - Search term (not yet implemented)
-	 * - Playlist URL (not yet implemented)
 	 */
-	getVideoInfos(resource: string) {
-		return Promise.all(this.getVideoUrls(resource).map((url) => videoBasicInfo(url)));
+	async getVideoInfos(resource: string): Promise<PlaydlInfoData[]> {
+		const urls = await this.getVideoUrls(resource);
+
+		const videos = await Promise.allSettled(
+			urls.filter((value): value is string => Boolean(value)).map((url) => videoBasicInfo(url))
+		);
+
+		return videos
+			.map((video) => video.status === 'fulfilled' && video.value)
+			.filter((value): value is PlaydlInfoData => !!value);
 	}
 }
