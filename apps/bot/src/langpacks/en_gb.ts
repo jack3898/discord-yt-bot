@@ -92,7 +92,10 @@ export default {
 			},
 			RESPONSE: {
 				SUCCESS:
-					'Added `{{count}}` videos to the queue. Some may have been omitted as they are private, age restricted or something else.'
+					'Added `{{count}}` videos to the queue. Some may have been omitted as they are private, age restricted or something else.',
+				PLAYLIST_WARN:
+					'There are {{count}} potential videos in the playlist you are trying to import. Are you sure?',
+				PLAYLIST_ADD_CANCELLED: 'Operation has been cancelled.'
 			},
 			ERROR: {
 				INTERNAL_ERROR: 'There was an internal server problem.',
@@ -106,7 +109,7 @@ export default {
 				SUCCESS_EMBED: {
 					TITLE: 'About this bot',
 					DESCRIPTION: [
-						'Free and open source music bot by Jack Wright. It is free and open source!',
+						'Free and open source music bot by Jack Wright.',
 						'[View source code on GitHub](https://github.com/jack3898/discord-yt-bot)',
 						'Version: {{version}}'
 					].join('\n\n')
@@ -133,7 +136,7 @@ export default {
 			RESPONSE: {
 				SUCCESS_EMBED: {
 					TITLE: 'Server queue',
-					ITEM_TITLE: '{{index}}) {{videotitle}}',
+					ITEM_TITLE: '{{index}}) {{{videotitle}}}',
 					ITEM_TITLE_EMPTY: 'Empty :(',
 					ITEM_DETAILS: '[{{channel}}]({{channelurl}}) | `{{views}}` views | [open]({{videourl}}) ',
 					ITEM_DETAILS_EMPTY: 'The queue is empty!',
@@ -167,6 +170,12 @@ export default {
 				NOT_PLAYING: 'I am not currently playing anything that could be paused!',
 				NO_VOICE_PERM: 'You do not have voice permission for this voice channel.'
 			}
+		}
+	},
+	BOT: {
+		COMFIRM_DIALOGUE: {
+			CONFIRM: 'Confirm',
+			DENY: 'No thanks!'
 		}
 	}
 } as const;

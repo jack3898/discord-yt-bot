@@ -1,8 +1,8 @@
+import { SlashCommandBuilder } from 'discord.js';
+import { BotService, QueueService } from '../services';
 import type { CommandInteraction, ICommand } from '../types';
 import { ENTITY_TYPES, RESOURCE_TYPES } from '@yt-bot/constants';
 import { LANG } from '../langpacks';
-import { QueueService } from '../services';
-import { SlashCommandBuilder } from 'discord.js';
 import { YouTubeService } from '../services/YouTubeService';
 import { injectable } from 'tsyringe';
 import { t } from '@yt-bot/i18n';
@@ -11,7 +11,11 @@ const COMMAND = LANG.COMMANDS.ENQUEUE;
 
 @injectable()
 export class Enqueue implements ICommand {
-	constructor(private youtubeService: YouTubeService, private queueService: QueueService) {}
+	constructor(
+		private botService: BotService,
+		private youtubeService: YouTubeService,
+		private queueService: QueueService
+	) {}
 
 	definition = new SlashCommandBuilder()
 		.setName(COMMAND.NAME)
@@ -37,16 +41,32 @@ export class Enqueue implements ICommand {
 
 	async execute(interaction: CommandInteraction) {
 		try {
+			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
+			const isPlaylist = this.youtubeService.identifyResource(resource) === 'playlist';
+
+			if (isPlaylist) {
+				const playlistInfo = await this.youtubeService.getPlaylistInfo(resource);
+
+				if (playlistInfo?.total_videos > 50) {
+					const confirmed = await this.botService.confirmationReply(
+						interaction,
+						t(COMMAND.RESPONSE.PLAYLIST_WARN, { count: playlistInfo.total_videos })
+					);
+
+					if (!confirmed) {
+						return void interaction.editReply(COMMAND.RESPONSE.PLAYLIST_ADD_CANCELLED);
+					}
+				}
+			}
+
 			await interaction.deferReply();
 
-			const resource = interaction.options.getString(COMMAND.OPTION.RESOURCE.NAME, true);
 			const videos = await this.youtubeService.getVideoInfos(resource);
 			const videoIds = videos.map(({ video_details: { id } }) => id).filter((id): id is string => !!id);
 
 			if (!videoIds.length) {
-				return void interaction.reply({
-					content: COMMAND.ERROR.INVALID_RESOURCE,
-					ephemeral: true
+				return void interaction.editReply({
+					content: COMMAND.ERROR.INVALID_RESOURCE
 				});
 			}
 
@@ -59,11 +79,12 @@ export class Enqueue implements ICommand {
 				entityType === ENTITY_TYPES.GUILD ? interaction.guild.id : undefined
 			);
 
-			await interaction.editReply(
-				t(COMMAND.RESPONSE.SUCCESS, {
+			await interaction.editReply({
+				content: t(COMMAND.RESPONSE.SUCCESS, {
 					count: videoIds.length
-				})
-			);
+				}),
+				components: []
+			});
 		} catch (error) {
 			console.error(error);
 

@@ -1,4 +1,12 @@
-import { Client, GatewayIntentBits } from 'discord.js';
+import {
+	type ChatInputCommandInteraction,
+	GatewayIntentBits,
+	Client,
+	type Interaction,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle
+} from 'discord.js';
 import { container, singleton } from 'tsyringe';
 import { CommandService } from './CommandService';
 import type { IEvent } from '../types';
@@ -59,5 +67,53 @@ export class BotService extends Client {
 
 			console.log(`🟩 Command "${instance.definition.name}" loaded.`);
 		}
+	}
+
+	/**
+	 * Prompt the user to confirm or deny something before the command continues processing.
+	 *
+	 * @returns true if they confirm, false if they deny
+	 */
+	async confirmationReply(interaction: ChatInputCommandInteraction, message: string): Promise<boolean> {
+		const confirmBtn = new ButtonBuilder()
+			.setCustomId('confirm')
+			.setLabel(LANG.BOT.COMFIRM_DIALOGUE.CONFIRM)
+			.setStyle(ButtonStyle.Danger);
+
+		const denyBtn = new ButtonBuilder()
+			.setCustomId('deny')
+			.setLabel(LANG.BOT.COMFIRM_DIALOGUE.DENY)
+			.setStyle(ButtonStyle.Success);
+
+		const row = new ActionRowBuilder().addComponents(denyBtn, confirmBtn);
+
+		await interaction.reply({
+			content: message,
+			ephemeral: true,
+			components: [row as ActionRowBuilder<ButtonBuilder>]
+		});
+
+		const confirmed = await new Promise<boolean>((res) => {
+			this.once('interactionCreate', (interaction: Interaction) => {
+				if (!interaction.isButton()) {
+					return;
+				}
+
+				switch (interaction.customId) {
+					case 'confirm':
+						res(true);
+						break;
+					case 'deny':
+						res(false);
+						break;
+					default:
+						res(false);
+				}
+
+				interaction.deferUpdate();
+			});
+		});
+
+		return confirmed;
 	}
 }

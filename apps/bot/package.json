@@ -31,7 +31,7 @@
         "@yt-bot/env": "*",
         "@yt-bot/i18n": "*",
         "@yt-bot/validation": "*",
-        "discord.js": "^14.7.1",
+        "discord.js": "^14.9.0",
         "ffmpeg-static": "^5.1.0",
         "play-dl": "^1.9.6",
         "reflect-metadata": "^0.1.13",

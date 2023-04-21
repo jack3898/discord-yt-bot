@@ -1,6 +1,7 @@
 import { type AudioResource, createAudioResource } from '@discordjs/voice';
 import {
 	type InfoData as PlaydlInfoData,
+	type YouTubePlayList,
 	stream as startStream,
 	video_basic_info as videoBasicInfo,
 	playlist_info as ytPlaylistInfo,
@@ -25,7 +26,7 @@ export class YouTubeService {
 		switch (ytValidate(resource)) {
 			case 'playlist': {
 				try {
-					const playlistInfo = await ytPlaylistInfo(resource);
+					const playlistInfo = await this.getPlaylistInfo(resource);
 					const allVideos = await playlistInfo.all_videos();
 
 					return allVideos.map(({ url }) => url);
@@ -44,6 +45,14 @@ export class YouTubeService {
 			default:
 				return [];
 		}
+	}
+
+	identifyResource(resource: string) {
+		return ytValidate(resource) || null;
+	}
+
+	getPlaylistInfo(resource: string): Promise<YouTubePlayList> {
+		return ytPlaylistInfo(resource);
 	}
 
 	async createAudioResourceFromUrl(url: string): Promise<AudioResource | null> {
